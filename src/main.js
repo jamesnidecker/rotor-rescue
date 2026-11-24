@@ -1,0 +1,42 @@
+// Rotor Rescue entry point. Reusable parts come from src/kit (8Blip Kit);
+// everything specific to this game lives in src/game.
+import { createArcadeGame } from './kit/page.js';
+import { GAME_W, GAME_H, DEV_TOOLS } from './game/config.js';
+import { tune } from './game/tuning.js';
+import { stats } from './game/store.js';
+import BootScene from './game/scenes/BootScene.js';
+import TitleScene from './game/scenes/TitleScene.js';
+import GameScene from './game/scenes/GameScene.js';
+
+async function start() {
+  tune.load();
+  const game = await createArcadeGame({
+    width: GAME_W,
+    height: GAME_H,
+    scenes: [BootScene, TitleScene, GameScene],
+  });
+  window.__game = game; // handy for debugging in the browser console
+
+  if (DEV_TOOLS) {
+    const params = new URLSearchParams(window.location.search);
+    if (params.has('tune')) {
+      const { mountTunePanel } = await import('./kit/dev/tunePanel.js');
+      mountTunePanel(tune);
+    }
+    if (params.has('stats')) {
+      const [{ mountStatsPanel }, strip] = await Promise.all([
+        import('./kit/dev/statsPanel.js'),
+        import('./game/statsStrip.js'),
+      ]);
+      mountStatsPanel({
+        stats,
+        title: 'Rotor Rescue',
+        outcomes: { crash: 'Crashed', finish: 'Reached helipad', quit: 'Quit (restart)' },
+        levelLength: strip.levelLength,
+        drawLevelStrip: strip.drawLevelStrip,
+      });
+    }
+  }
+}
+
+start();
