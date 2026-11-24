@@ -1,6 +1,6 @@
 # 8Blip Playbook — how we make every game
 
-**Version:** 1.0 · 2026-11-23
+**Version:** 1.1 · 2026-11-24
 **Applies to:** every 8Blip Arcade game (Rotor Rescue first, then the shoot 'em up and the rescue run)
 **Based on:** standard indie game development practice: greybox prototyping, vertical slice, Nintendo's 4-step level design, "juice" for game feel, structured playtesting, scope freeze, soft launch, post-launch content and a postmortem.
 
@@ -21,8 +21,32 @@
 | 9 | **Launch** | App Store release, TikTok | Live |
 | 10 | **Look back** | Short postmortem: what went well, what didn't, what to change for the next game | Lessons added to this playbook |
 | 11 | **Updates** | New levels and seasons (live ops) | Per update, phases 5–9 again |
+| 12 | **Fill the 8Blip Kit** | Move the reusable parts of the game into the shared kit (see below) | The next game can start from the kit |
 
 **Why the vertical slice matters:** if the look, sound or feel changes after level 1, only one level has to be redone instead of twelve.
+
+## The 8Blip Kit — build once, use again
+A shared box of building blocks on top of Phaser, reused by every 8Blip game. **Decided (Jozo, 2026-11-24).** We keep Phaser as the engine; we don't write our own engine.
+
+**What goes in the kit (from Rotor Rescue):**
+- The 16-colour palette and the Press Start 2P font setup
+- HUD: score, lives, level, leading-zero numbers, blinking text
+- Pause menu with music and sound switches, auto-pause
+- The iPad arcade cabinet side panels and the "turn your device" screen
+- Title screen pattern: logo, attract mode, info button
+- READY! / 3 2 1 / GO!, GAME OVER and high score entry screens
+- Worldwide high score list and seasons
+- Tuning panel (`?tune=1`) and playtest stats screen (`?stats=1`)
+- The 8-bit synthesiser for music and sound effects
+- Screen flash, shake and pixel transitions
+
+**How:**
+- While building Rotor Rescue: keep these parts separate from the game's own code, so they're easy to lift out later
+- After the Rotor Rescue launch (phase 12): move them into the kit
+- Every next game starts from the kit and only builds what's new (the ship, the enemies, the levels)
+- An improvement to the kit, such as a better pause menu, can be brought into every game
+
+**Why:** game #2 gets finished much faster than game #1, and all 8Blip games feel like they come from the same studio.
 
 ## Level design: Nintendo's 4 steps
 Every level, or every new obstacle, follows four steps:
@@ -90,6 +114,7 @@ Half an hour, three questions:
 | 9 Launch | App Store + TikTok |
 | 10 Look back | Postmortem, lessons into this playbook |
 | 11 Updates | Spring, summer, autumn 2027: 10 levels each, new season |
+| 12 8Blip Kit | After launch: reusable parts move into the kit, ready for the shoot 'em up |
 
 This table replaces the "Build order" list in the design doc (§13) where they differ.
 
@@ -97,3 +122,4 @@ This table replaces the "Build order" list in the design doc (§13) where they d
 | Version | Date | Change |
 |---|---|---|
 | 1.0 | 2026-11-23 | First playbook, after Jozo asked whether our process matches known game development practice. Added vertical slice gate, 4-step level design, playtest routine, scope freeze, juice round, soft launch, launch checklist and postmortem. |
+| 1.1 | 2026-11-24 | Added the 8Blip Kit (phase 12): shared building blocks on top of Phaser, reused by every game. Decided to stay with Phaser rather than write an own engine. |
