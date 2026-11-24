@@ -56,7 +56,12 @@ export default class GameScene extends Phaser.Scene {
       .setDepth(FLASH_DEPTH)
       .setVisible(false);
 
+    // Reset ALL per-round state here: Phaser re-uses this scene object on
+    // restart, so anything not reset would leak into the next round.
     this.paused = false;
+    this.leaving = false;
+    this.tapOkAt = 0;
+    this.landTarget = null;
     this.fingers = new Set();
     this.spaceDown = false;
     this.debris = [];
