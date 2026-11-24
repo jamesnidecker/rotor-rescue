@@ -8,7 +8,7 @@ export const HUD_H = 24;
 //   1UP        LEVEL 01            [II]
 //   000000     ▲▲▲      ■ 0/5
 // opts: { score, level, lives, maxLives, lifeIcon(scene,x,y), counterIcon(scene,x,y),
-//         counterTotal, onPause, depth }
+//         counterTotal, meter (bool: small bar after LEVEL), onPause, depth }
 export function createHud(scene, opts) {
   const W = scene.scale.gameSize.width;
   const depth = opts.depth ?? 100;
@@ -33,6 +33,16 @@ export function createHud(scene, opts) {
     counter = ui(text(scene, 116, 13, `0/${opts.counterTotal}`, TEXT.number));
   }
 
+  // Optional small meter (e.g. hover gauge), between LEVEL and the pause button.
+  const meter = scene.add.container(132, 3).setScrollFactor(0).setDepth(depth).setVisible(false);
+  const meterFill = scene.add.rectangle(1, 1, 20, 5, PAL.cyan).setOrigin(0);
+  meter.add([
+    scene.add.rectangle(0, 0, 22, 7, PAL.white).setOrigin(0),
+    scene.add.rectangle(1, 1, 20, 5, PAL.black).setOrigin(0),
+    meterFill,
+  ]);
+  meter.setScrollFactor(0, 0, true);
+
   ui(makePauseIcon(scene, W - 20, 4));
   // Big touch target around the small icon.
   const pauseZone = ui(scene.add.zone(W - 34, 0, 34, HUD_H + 8).setOrigin(0).setInteractive());
@@ -45,5 +55,11 @@ export function createHud(scene, opts) {
     setLevel: (n) => setText(level, String(n).padStart(2, '0')),
     setLives: (n) => lives.forEach((ic, i) => ic.setVisible(i < n)),
     setCounter: (n, total) => counter && setText(counter, `${n}/${total ?? opts.counterTotal}`),
+    // value 0..1; warn = draw it red
+    setMeter(value, warn = false) {
+      const w = Math.round(20 * Math.max(0, Math.min(1, value)));
+      meterFill.setVisible(w > 0).setSize(Math.max(1, w), 5).setFillStyle(warn ? PAL.red : PAL.cyan);
+    },
+    showMeter: (on) => meter.setVisible(on),
   };
 }

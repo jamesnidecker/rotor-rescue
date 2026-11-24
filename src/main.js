@@ -22,6 +22,8 @@ async function start() {
     if (params.has('tune')) {
       const { mountTunePanel } = await import('./kit/dev/tunePanel.js');
       mountTunePanel(tune, {
+        // eslint-disable-next-line no-undef
+        build: typeof __BUILD__ !== 'undefined' ? __BUILD__ : 'dev',
         onRestart: () => {
           const g = game.scene.getScene('game');
           if (g.sys.isActive()) g.restartRun();

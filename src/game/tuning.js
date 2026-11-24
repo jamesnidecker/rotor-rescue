@@ -17,6 +17,7 @@ export const TUNING_SPEC = [
   { key: 'hoverLimitMode', label: 'Hover limit: 0 off · 1 time per hold · 2 gauge', min: 0, max: 2, step: 1, def: 0, unit: '' },
   { key: 'hoverTimeLimit', label: '(1) Hover time per hold', min: 0.25, max: 4, step: 0.05, def: 1.25, unit: 's' },
   { key: 'gaugeSeconds', label: '(2) Full gauge lasts', min: 0.25, max: 6, step: 0.05, def: 1.5, unit: 's' },
+  { key: 'gaugeDisplay', label: '(2) Gauge shown: 0 top bar + flash · 1 flash only · 2 above heli', min: 0, max: 2, step: 1, def: 0, unit: '' },
   { key: 'gaugeRefillSeconds', label: '(2) Gauge refills in', min: 0.25, max: 8, step: 0.05, def: 2, unit: 's' },
 ];
 

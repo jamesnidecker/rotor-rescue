@@ -112,9 +112,11 @@ export default class GameScene extends Phaser.Scene {
     c.add([
       this.rotor,
       this.add.rectangle(7, 1, 2, 2, PAL.darkGrey).setOrigin(0), // mast
-      this.add.rectangle(4, 3, 12, 6, PAL.red).setOrigin(0), // body
-      this.add.rectangle(0, 4, 4, 2, PAL.red).setOrigin(0), // tail
-      this.add.rectangle(0, 2, 1, 3, PAL.red).setOrigin(0), // tail fin
+      ...(this.heliRed = [
+        this.add.rectangle(4, 3, 12, 6, PAL.red).setOrigin(0), // body
+        this.add.rectangle(0, 4, 4, 2, PAL.red).setOrigin(0), // tail
+        this.add.rectangle(0, 2, 1, 3, PAL.red).setOrigin(0), // tail fin
+      ]),
       this.add.rectangle(12, 4, 3, 2, PAL.white).setOrigin(0), // window
       this.add.rectangle(5, 9, 10, 1, PAL.darkGrey).setOrigin(0), // skid
     ]);
@@ -535,7 +537,16 @@ export default class GameScene extends Phaser.Scene {
     if (this.rotorTick < 3) this.rotor.setPosition(1, 0).setSize(15, 1);
     else this.rotor.setPosition(4, 0).setSize(9, 1);
 
-    const showGauge = tuning.hoverLimitMode === 2 && this.heliGfx.visible && h.gauge < 1;
+    // Hover gauge display (hover-limit mode 2), see tuning 'gaugeDisplay':
+    //   0 = small meter in the HUD + helicopter flashes when almost empty
+    //   1 = flash only   2 = bar above the helicopter
+    const gaugeMode = tuning.hoverLimitMode === 2;
+    const low = gaugeMode && h.gauge < 0.3 && this.state === 'flying';
+    this.hud.showMeter(gaugeMode && tuning.gaugeDisplay === 0);
+    if (gaugeMode) this.hud.setMeter(h.gauge, low);
+    const flash = low && tuning.gaugeDisplay !== 2 && Math.floor(this.time.now / 100) % 2 === 0;
+    this.heliRed.forEach((r) => r.setFillStyle(flash ? PAL.white : PAL.red));
+    const showGauge = gaugeMode && tuning.gaugeDisplay === 2 && this.heliGfx.visible && h.gauge < 1;
     this.gaugeBg.setVisible(showGauge).setPosition(Math.round(h.x) + 1, Math.round(h.y) - 4);
     const fw = Math.round(14 * h.gauge);
     this.gaugeFill
