@@ -68,9 +68,19 @@ export function mountTunePanel(tune, opts = {}) {
   actions.appendChild(note);
   panel.prepend(actions);
 
+  // While the panel is open, the game shrinks into the space above it, so the
+  // panel never covers anything the player needs to tap.
+  const fit = () => {
+    const h = panel.hidden ? 0 : panel.offsetHeight;
+    document.documentElement.style.setProperty('--dev-panel-h', `${h}px`);
+    window.dispatchEvent(new Event('resize')); // let Phaser re-fit the canvas
+  };
   const setOpen = (open) => {
     panel.hidden = !open;
     toggle.hidden = open;
+    document.body.classList.toggle('dev-panel-open', open);
+    fit();
   };
+  window.addEventListener('orientationchange', () => setTimeout(fit, 300));
   toggle.addEventListener('click', () => setOpen(true));
 }

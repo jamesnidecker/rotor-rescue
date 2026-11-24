@@ -34,6 +34,10 @@ body {
   right: env(safe-area-inset-right, 0px);
 }
 
+body.dev-panel-open #game {
+  bottom: var(--dev-panel-h, 0px);
+}
+
 #game canvas {
   image-rendering: pixelated;
   image-rendering: crisp-edges;
