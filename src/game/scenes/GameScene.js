@@ -39,6 +39,7 @@ export default class GameScene extends Phaser.Scene {
   }
 
   create() {
+    this.time.paused = false; // never start with a frozen clock
     this.cameras.main.setBackgroundColor(PAL.skyBlue);
     this.cameras.main.setRoundPixels(true);
 
@@ -181,6 +182,11 @@ export default class GameScene extends Phaser.Scene {
 
   restartRun() {
     if (this.state === 'flying') this.endAttempt('quit');
+    // Un-pause the scene clock first: it survives a scene restart, and a paused
+    // clock would freeze the READY / 3 2 1 / GO! countdown.
+    this.paused = false;
+    this.time.paused = false;
+    this.tweens.resumeAll();
     this.scene.restart({ fresh: true });
   }
 
