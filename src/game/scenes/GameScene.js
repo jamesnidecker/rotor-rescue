@@ -412,7 +412,7 @@ export default class GameScene extends Phaser.Scene {
 
     const o = (obj) => obj.setScrollFactor(0).setDepth(MENU_DEPTH);
     const top = 72;
-    const h = perfect ? 168 : 140;
+    const h = perfect ? 176 : 148;
     o(this.add.rectangle(12, top, GAME_W - 24, h, PAL.white).setOrigin(0));
     o(this.add.rectangle(14, top + 2, GAME_W - 28, h - 4, PAL.black).setOrigin(0));
     let y = top + 12;
@@ -435,8 +435,15 @@ export default class GameScene extends Phaser.Scene {
     y += 4;
     row('SCORE', score6(this.run.score));
 
-    this.tapOkAt = this.time.now + 300; // tap to skip
-    this.time.delayedCall(3000, () => this.nextLevel());
+    // The player decides when to go on. TAP TO CONTINUE appears after a short
+    // moment, so a tap that was meant for flying doesn't skip the score.
+    y += 12;
+    const cont = o(centerText(this, y, 'TAP TO CONTINUE', TEXT.message)).setVisible(false);
+    this.tapOkAt = this.time.now + 1000;
+    this.time.delayedCall(1000, () => {
+      cont.setVisible(true);
+      blink(this, cont);
+    });
   }
 
   nextLevel() {
