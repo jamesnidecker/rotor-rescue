@@ -1,6 +1,6 @@
 # Rotor Rescue — Game Design
 
-**Version:** 0.9 · 2026-11-23
+**Version:** 0.10 · 2026-11-24
 **Studio:** 8Blip Arcade
 **App Store title:** Rotor Rescue · **Subtitle (proposal):** 8-bit Heli Rescue Arcade
 **Replaces:** the dodge game as game #1 (the dodge game moves to "later")
@@ -16,6 +16,7 @@ Fly a rescue helicopter through a city full of obstacles. Pick up people and goo
 - **Tap** = the helicopter goes up a little
 - **Hold** = hover / fly level
 - **Let go** = the helicopter drops
+- **Limited hover — TO TEST (Jozo's idea, 2026-11-24):** hovering only lasts a limited time, so it can't make the game too easy. Two versions to compare in playtests: (a) **fixed time per hold**: after ~1–1.5 s of holding, the helicopter starts sinking; (b) **hover gauge**: a small bar that drains while hovering and refills when not holding. Both tunable in the tuning panel; 0 = unlimited for comparison
 - The helicopter **always moves forward** at a fixed speed. The player only controls height.
 - **Pickup** = fly low over people or goods and they grab on. No landing needed.
 - **Portrait, one thumb** — DECIDED
@@ -192,6 +193,7 @@ Each update: new location(s), one new obstacle type, one new music track, new se
 ---
 
 ## Still open
+- Limited hover: fixed time per hold vs hover gauge vs unlimited (§2), decided in the milestone 1 playtest
 - Setting for the autumn 2027 update (§11)
 - Per-level background and obstacle list for levels 1–11 (proposal in §6)
 - Exact point values, extra-life threshold and loop speed (tune in testing)
@@ -211,3 +213,4 @@ Each update: new location(s), one new obstacle type, one new music track, new se
 | 0.7 | 2026-11-23 | Locked: 10 levels per update, cap 42. Level 12 is a neon futuristic city finale. |
 | 0.8 | 2026-11-23 | Name locked: Rotor Rescue. Build brief for milestone 1 written. |
 | 0.9 | 2026-11-23 | Locked: portrait, iPad arcade cabinet frame. Added difficulty target with measurable playtest targets, sawtooth curve and a local-only playtest stats screen. Copied into the repo's `docs/` folder on 2026-11-24; build order now lives in the playbook. |
+| 0.10 | 2026-11-24 | Added limited hover as a test item (Jozo's idea): fixed hover time per hold or a hover gauge, both tunable, compared against unlimited hover in the first playtest. Same intent as the original double-tap idea, without the input delay. |
