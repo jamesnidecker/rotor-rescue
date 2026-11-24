@@ -2,7 +2,8 @@ import { copyText } from './clipboard.js';
 
 // Hidden tuning panel: open the game with ?tune=1. `tune` comes from createTuning().
 // Changes apply instantly while playing and are saved on this device.
-export function mountTunePanel(tune) {
+// opts.onRestart (optional): adds a "Restart game" button.
+export function mountTunePanel(tune, opts = {}) {
   const { spec: TUNING_SPEC, values: tuning } = tune;
   const toggle = document.createElement('button');
   toggle.id = 'tune-toggle';
@@ -62,9 +63,10 @@ export function mountTunePanel(tune) {
     }
     note.textContent = 'Defaults restored';
   });
+  if (opts.onRestart) mk('Restart game', () => opts.onRestart());
   mk('Close', () => setOpen(false));
   actions.appendChild(note);
-  panel.appendChild(actions);
+  panel.prepend(actions);
 
   const setOpen = (open) => {
     panel.hidden = !open;

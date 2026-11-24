@@ -117,7 +117,7 @@ body {
   bottom: 0;
   max-width: 480px;
   margin: 0 auto;
-  max-height: 55vh;
+  max-height: 34vh;
   overflow-y: auto;
   padding: 10px 12px calc(12px + env(safe-area-inset-bottom, 0px));
   box-sizing: border-box;
@@ -126,11 +126,19 @@ body {
   display: grid;
   grid-template-columns: 1fr 76px;
   align-items: center;
-  margin: 2px 0 8px;
+  margin: 0 0 4px;
 }
 #tune-panel label {
   grid-column: 1 / 3;
   color: #3fe0e0;
+  font-size: 12px;
+}
+#tune-panel .dev-actions {
+  position: sticky;
+  top: -10px;
+  background: #1d1a3a;
+  padding: 4px 0 8px;
+  margin: 0 0 6px;
 }
 #tune-panel input[type='range'] {
   width: 100%;

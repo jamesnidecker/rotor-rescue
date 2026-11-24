@@ -21,7 +21,16 @@ async function start() {
     const params = new URLSearchParams(window.location.search);
     if (params.has('tune')) {
       const { mountTunePanel } = await import('./kit/dev/tunePanel.js');
-      mountTunePanel(tune);
+      mountTunePanel(tune, {
+        onRestart: () => {
+          const g = game.scene.getScene('game');
+          if (g.sys.isActive()) g.restartRun();
+          else {
+            game.scene.stop('title');
+            game.scene.start('game', { fresh: true });
+          }
+        },
+      });
     }
     if (params.has('stats')) {
       const [{ mountStatsPanel }, strip] = await Promise.all([
