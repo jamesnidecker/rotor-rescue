@@ -12,6 +12,12 @@ export const TUNING_SPEC = [
   // Extras (not in the brief, but useful knobs for the same feel):
   { key: 'hoverDelay', label: 'Hold → hover after', min: 0, max: 400, step: 10, def: 150, unit: 'ms' },
   { key: 'maxFallSpeed', label: 'Max fall speed', min: 100, max: 800, step: 10, def: 320, unit: 'px/s' },
+  // Limited hover — to compare in the playtest (design doc §2):
+  //   0 = unlimited, 1 = fixed time per hold, 2 = hover gauge
+  { key: 'hoverLimitMode', label: 'Hover limit: 0 off · 1 time per hold · 2 gauge', min: 0, max: 2, step: 1, def: 0, unit: '' },
+  { key: 'hoverTimeLimit', label: '(1) Hover time per hold', min: 0.25, max: 4, step: 0.05, def: 1.25, unit: 's' },
+  { key: 'gaugeSeconds', label: '(2) Full gauge lasts', min: 0.25, max: 6, step: 0.05, def: 1.5, unit: 's' },
+  { key: 'gaugeRefillSeconds', label: '(2) Gauge refills in', min: 0.25, max: 8, step: 0.05, def: 2, unit: 's' },
 ];
 
 export const tune = createTuning(TUNING_SPEC, store);

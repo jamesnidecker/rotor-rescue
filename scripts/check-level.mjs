@@ -51,6 +51,8 @@ for (const level of LEVELS) {
     ['default tuning, input every 0.10 s', DEFAULT_TUNING, 0.1],
     ['default tuning, input every 0.15 s', DEFAULT_TUNING, 0.15],
     ['hitbox 100%, input every 0.10 s', { ...DEFAULT_TUNING, hitboxPct: 100 }, 0.1],
+    ['hover limit 1 (time per hold)', { ...DEFAULT_TUNING, hoverLimitMode: 1 }, 0.1],
+    ['hover limit 2 (gauge)', { ...DEFAULT_TUNING, hoverLimitMode: 2 }, 0.1],
   ];
   for (const [name, t, dec] of cases) {
     const r = run(level, t, dec, 400);

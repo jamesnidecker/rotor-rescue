@@ -113,6 +113,9 @@ export default class GameScene extends Phaser.Scene {
       this.add.rectangle(5, 9, 10, 1, PAL.darkGrey).setOrigin(0), // skid
     ]);
     this.heliGfx = c;
+    // Hover gauge (only in hover-limit mode 2): thin bar above the helicopter.
+    this.gaugeBg = this.add.rectangle(0, 0, 14, 2, PAL.black).setOrigin(0).setDepth(12).setVisible(false);
+    this.gaugeFill = this.add.rectangle(0, 0, 14, 2, PAL.cyan).setOrigin(0).setDepth(13).setVisible(false);
     this.rotorTick = 0;
   }
 
@@ -513,6 +516,15 @@ export default class GameScene extends Phaser.Scene {
     this.rotorTick = (this.rotorTick + 1) % 6;
     if (this.rotorTick < 3) this.rotor.setPosition(1, 0).setSize(15, 1);
     else this.rotor.setPosition(4, 0).setSize(9, 1);
+
+    const showGauge = tuning.hoverLimitMode === 2 && this.heliGfx.visible && h.gauge < 1;
+    this.gaugeBg.setVisible(showGauge).setPosition(Math.round(h.x) + 1, Math.round(h.y) - 4);
+    const fw = Math.round(14 * h.gauge);
+    this.gaugeFill
+      .setVisible(showGauge && fw > 0)
+      .setPosition(Math.round(h.x) + 1, Math.round(h.y) - 4)
+      .setSize(Math.max(1, fw), 2)
+      .setFillStyle(h.gauge < 0.3 ? PAL.red : PAL.cyan);
 
     const maxScroll = this.world.length - GAME_W;
     const sx = Phaser.Math.Clamp(Math.round(h.x - HELI_SCREEN_X), 0, maxScroll);
