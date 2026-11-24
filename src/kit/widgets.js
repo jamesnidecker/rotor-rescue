@@ -2,7 +2,11 @@ import { PAL } from './palette.js';
 import { text } from './text.js';
 
 // Square, pixel-bevelled button: light edge top-left, dark edge bottom-right.
-export function makeButton(scene, x, y, w, h, label, onTap) {
+// x, y are final positions. The touch zone is NOT inside the container: Phaser
+// mis-places taps on container children once the camera has scrolled, so the
+// zone is a separate object at the same spot (button.zone). For screen-fixed
+// UI, give it scrollFactor 0 (opts.fixed, default true).
+export function makeButton(scene, x, y, w, h, label, onTap, opts = {}) {
   const c = scene.add.container(x, y);
   const parts = [
     scene.add.rectangle(0, 0, w, h, PAL.black).setOrigin(0),
@@ -13,10 +17,10 @@ export function makeButton(scene, x, y, w, h, label, onTap) {
   const t = text(scene, w / 2, Math.round(h / 2 - 4), label, PAL.white, 8, 'center');
   c.add([...parts, t]);
   c.label = t;
-  const zone = scene.add.zone(0, 0, w, h).setOrigin(0).setInteractive();
+  const zone = scene.add.zone(x, y, w, h).setOrigin(0).setInteractive();
+  if (opts.fixed !== false) zone.setScrollFactor(0);
   zone.isUI = true;
   zone.on('pointerdown', () => onTap());
-  c.add(zone);
   c.zone = zone;
   return c;
 }

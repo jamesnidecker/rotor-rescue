@@ -6,6 +6,7 @@ import { createPauseMenu } from '../../kit/pauseMenu.js';
 import {
   GAME_W,
   GAME_H,
+  HUD_H,
   GROUND_Y,
   GROUND_H,
   HELI_W,
@@ -25,7 +26,8 @@ import { lifeIcon, personIcon } from '../icons.js';
 const DT = 1 / 120; // fixed physics step: same feel at 60 Hz and 120 Hz
 const UI_DEPTH = 100;
 const MSG_DEPTH = 200;
-const MENU_DEPTH = 250;
+const MENU_DEPTH = 250; // score screen, game over
+const PAUSE_DEPTH = 260; // pause menu: above everything except the crash flash
 const FLASH_DEPTH = 300;
 
 export default class GameScene extends Phaser.Scene {
@@ -154,12 +156,14 @@ export default class GameScene extends Phaser.Scene {
       store,
       onResume: () => this.resumeGame(),
       onRestart: () => this.restartRun(),
-      depth: MENU_DEPTH,
+      depth: PAUSE_DEPTH,
     });
   }
 
   canPause() {
-    return !this.paused && (this.state === 'ready' || this.state === 'flying' || this.state === 'landing');
+    // Always available (flying, score screen, game over...), so the MUSIC / SFX
+    // switches can be reached at any moment.
+    return !this.paused && !!this.state;
   }
 
   pauseGame() {
@@ -359,9 +363,11 @@ export default class GameScene extends Phaser.Scene {
   gameOver() {
     this.state = 'gameover';
     store.submitScore(this.run.score);
+    this.updateHud(); // lives now show 0
     this.clearMessages();
     const o = (obj) => obj.setScrollFactor(0).setDepth(MENU_DEPTH);
-    o(this.add.rectangle(0, 0, GAME_W, GAME_H, PAL.black).setOrigin(0));
+    // Below the HUD bar, so the score and the pause button stay visible.
+    o(this.add.rectangle(0, HUD_H, GAME_W, GAME_H - HUD_H, PAL.black).setOrigin(0));
     o(centerText(this, 96, 'GAME OVER', TEXT.warning, 16));
     o(centerText(this, 144, 'SCORE', TEXT.label));
     o(centerText(this, 156, score6(this.run.score), TEXT.number));

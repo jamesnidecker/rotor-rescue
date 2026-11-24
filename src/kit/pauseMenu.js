@@ -21,8 +21,9 @@ export function createPauseMenu(scene, opts) {
   const bw = pw - 24;
   const bx = px + 12;
   const onOff = (v) => (v ? 'ON' : 'OFF');
-  const toggle = (key, label) => {
-    const b = makeButton(scene, 0, 0, bw, 24, `${label} ${onOff(opts.store.getSettings()[key])}`, () => {
+  const at = (i) => py + 40 + i * 32;
+  const toggle = (i, key, label) => {
+    const b = makeButton(scene, bx, at(i), bw, 24, `${label} ${onOff(opts.store.getSettings()[key])}`, () => {
       const s = opts.store.getSettings();
       s[key] = !s[key];
       opts.store.setSettings(s);
@@ -31,15 +32,14 @@ export function createPauseMenu(scene, opts) {
     return b;
   };
   const buttons = [
-    makeButton(scene, 0, 0, bw, 24, 'RESUME', () => opts.onResume?.()),
-    makeButton(scene, 0, 0, bw, 24, 'RESTART', () => opts.onRestart?.()),
-    toggle('music', 'MUSIC'),
-    toggle('sfx', 'SFX'),
+    makeButton(scene, bx, at(0), bw, 24, 'RESUME', () => opts.onResume?.()),
+    makeButton(scene, bx, at(1), bw, 24, 'RESTART', () => opts.onRestart?.()),
+    toggle(2, 'music', 'MUSIC'),
+    toggle(3, 'sfx', 'SFX'),
   ];
-  buttons.forEach((b, i) => b.setPosition(bx, py + 40 + i * 32));
   m.add(buttons);
   m.setScrollFactor(0, 0, true);
-  const zones = buttons.map((b) => b.zone);
+  const zones = buttons.map((b) => b.zone.setDepth((opts.depth ?? 250) + 1));
   zones.forEach((z) => z.disableInteractive());
 
   return {
