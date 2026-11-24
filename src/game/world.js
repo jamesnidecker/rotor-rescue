@@ -73,8 +73,16 @@ export function checkPickups(world, heli, rescued, t) {
   return got;
 }
 
-// Reached the helipad: the helicopter is over the pad and above its surface.
-export function reachedHelipad(world, heli) {
+// Reached the helipad: the helicopter is over the pad and its crash box is not
+// touching it. Uses the same crash box as checkCrash, so at the pad exactly one
+// of the two happens: land or crash (never "fly past").
+export function reachedHelipad(world, heli, t) {
   const pad = world.pad;
-  return heli.x + HELI_W >= pad.x + 6 && heli.y + HELI_H <= pad.y;
+  const hb = hitbox(heli, t.hitboxPct);
+  return hb.x + hb.w >= pad.x + 4 && hb.y + hb.h <= pad.y;
+}
+
+// Safety net: past the end of the level counts as a crash.
+export function pastLevelEnd(world, heli) {
+  return heli.x > world.pad.x + world.pad.w;
 }

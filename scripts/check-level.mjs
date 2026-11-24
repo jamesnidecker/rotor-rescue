@@ -2,7 +2,7 @@
 // with the default tuning and only coarse, human-speed inputs?
 // Usage: npm run check   (runs a small beam search over tap / hold / let go)
 import { LEVELS } from '../src/game/levels/index.js';
-import { buildWorld, checkCrash, checkPickups, reachedHelipad } from '../src/game/world.js';
+import { buildWorld, checkCrash, checkPickups, reachedHelipad, pastLevelEnd } from '../src/game/world.js';
 import { createHeli, press, release, stepHeli } from '../src/game/physics.js';
 import { DEFAULT_TUNING } from '../src/game/tuning.js';
 
@@ -18,7 +18,8 @@ function run(level, t, decisionSec, beamWidth) {
   let beam = [{ heli: createHeli(level.start.x, level.start.y), rescued: new Set(), alive: true }];
   beam[0].heli.waitingForFirstTouch = false; // be strict: gravity from the first frame
   let finished = [];
-  for (let d = 0; d < 100000 && beam.length; d++) {
+  const maxDecisions = Math.ceil(world.length / t.forwardSpeed / decisionSec) + 10;
+  for (let d = 0; d < maxDecisions && beam.length; d++) {
     const next = new Map();
     for (const s of beam) {
       for (const action of ['release', 'hold', 'tap']) {
@@ -28,8 +29,8 @@ function run(level, t, decisionSec, beamWidth) {
         for (let i = 0; i < stepsPerDecision; i++) {
           stepHeli(n.heli, t, DT);
           for (const p of checkPickups(world, n.heli, n.rescued, t)) n.rescued.add(p.id);
-          if (reachedHelipad(world, n.heli)) { n.done = true; break; }
-          if (checkCrash(world, n.heli, t)) { n.alive = false; break; }
+          if (reachedHelipad(world, n.heli, t)) { n.done = true; break; }
+          if (checkCrash(world, n.heli, t) || pastLevelEnd(world, n.heli)) { n.alive = false; break; }
         }
         if (!n.alive) continue;
         if (n.done) { finished.push(n); continue; }

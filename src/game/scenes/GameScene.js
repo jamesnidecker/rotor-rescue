@@ -18,7 +18,7 @@ import {
 import { tuning } from '../tuning.js';
 import { store, stats } from '../store.js';
 import { getLevel } from '../levels/index.js';
-import { buildWorld, checkCrash, checkPickups, reachedHelipad, PERSON_W, PERSON_H } from '../world.js';
+import { buildWorld, checkCrash, checkPickups, reachedHelipad, pastLevelEnd, PERSON_W, PERSON_H } from '../world.js';
 import { createHeli, press, release, stepHeli } from '../physics.js';
 import { lifeIcon, personIcon } from '../icons.js';
 
@@ -470,8 +470,8 @@ export default class GameScene extends Phaser.Scene {
   physicsStep(dt) {
     stepHeli(this.heli, tuning, dt);
     for (const p of checkPickups(this.world, this.heli, this.rescued, tuning)) this.pickup(p);
-    if (reachedHelipad(this.world, this.heli)) return this.startLanding();
-    if (checkCrash(this.world, this.heli, tuning)) this.crash();
+    if (reachedHelipad(this.world, this.heli, tuning)) return this.startLanding();
+    if (checkCrash(this.world, this.heli, tuning) || pastLevelEnd(this.world, this.heli)) this.crash();
   }
 
   pickup(p) {
