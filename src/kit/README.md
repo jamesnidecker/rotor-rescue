@@ -9,6 +9,9 @@ about a specific game** (no helicopters, no levels). Game code lives in
 | `palette.js` | The fixed 16-colour palette + text colour roles. The only colours allowed |
 | `font.js`, `assets/fonts/` | Bundled Press Start 2P (SIL OFL) turned into a crisp bitmap font |
 | `text.js` | Text helper: capitals only, sizes 8/16/24/32, whole pixels; 6-digit scores |
+| `pixels.js` | Pixel art from text maps (one letter per palette colour), dithering, seeded random |
+| `audio/synth.js` | 8-bit synthesiser: square, pulse, triangle, noise voices; sound effects as data |
+| `audio/music.js` | Chiptune music player (tracks of notes + drum patterns, loops) |
 | `widgets.js` | Square bevelled button, pixel pause icon |
 | `hud.js` | Arcade HUD bar: 1UP + score, LEVEL, lives, a counter, pause button |
 | `pauseMenu.js` | Pause overlay: RESUME, RESTART, MUSIC / SFX switches |

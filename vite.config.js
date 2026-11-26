@@ -23,5 +23,9 @@ export default defineConfig({
     target: 'es2020',
     assetsInlineLimit: 0, // keep the font as a real file next to the game
     chunkSizeWarningLimit: 2000,
+    rollupOptions: {
+      // Two pages: the game, and the art & sound picks page (milestone 2).
+      input: { main: 'index.html', preview: 'preview.html' },
+    },
   },
 });

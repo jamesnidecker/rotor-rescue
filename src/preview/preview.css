@@ -1,0 +1,26 @@
+@font-face {
+  font-family: 'Press Start 2P';
+  src: url('../kit/assets/fonts/PressStart2P.woff2') format('woff2');
+  font-display: block;
+}
+html, body { margin: 0; background: #1d1a3a; color: #ffffff; }
+body { font: 15px/1.45 system-ui, sans-serif; padding: 16px 16px 48px; max-width: 760px; margin: 0 auto; }
+h1, h2 { font-family: 'Press Start 2P', monospace; text-transform: uppercase; font-weight: normal; }
+h1 { font-size: 16px; line-height: 24px; color: #ffd93b; margin: 8px 0 4px; }
+h2 { font-size: 8px; line-height: 16px; color: #3fe0e0; margin: 28px 0 8px; font-size: 12px; }
+p.note { color: #b8b8c8; margin: 4px 0 12px; }
+canvas { image-rendering: pixelated; image-rendering: crisp-edges; display: block; }
+.scene { width: 360px; max-width: 100%; aspect-ratio: 180 / 320; border: 2px solid #b8b8c8; }
+.row { display: flex; gap: 12px; flex-wrap: wrap; }
+.card { background: #000000; border: 2px solid #6e6e82; padding: 10px; flex: 1 1 200px; cursor: pointer; }
+.card.picked { border-color: #ffd93b; }
+.card b { color: #ffd93b; }
+.card .sub { color: #b8b8c8; font-size: 13px; }
+.sound { background: #000000; border: 1px solid #3a3a48; padding: 10px; margin: 8px 0; }
+.sound .title { color: #3fe0e0; margin-bottom: 6px; }
+button { font: 14px/1.2 system-ui, sans-serif; background: #3a3a48; color: #ffffff; border: 1px solid #b8b8c8; padding: 10px 12px; margin: 3px 6px 3px 0; cursor: pointer; border-radius: 0; touch-action: manipulation; }
+button.picked { background: #ff8a1f; color: #000000; border-color: #ffd93b; }
+button.play { background: #2f5dd3; }
+textarea { width: 100%; box-sizing: border-box; min-height: 70px; font: 14px system-ui, sans-serif; background: #000; color: #fff; border: 1px solid #6e6e82; padding: 8px; }
+.actions { padding: 10px 0; border-top: 1px solid #6e6e82; margin-top: 24px; }
+.ok { color: #3ccb55; margin-left: 8px; }

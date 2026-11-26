@@ -8,6 +8,7 @@ Fly over the city, pick people up from the rooftops and land on the helipad.
 - **Play:** https://jamesnidecker.github.io/rotor-rescue/
 - **Tuning panel:** https://jamesnidecker.github.io/rotor-rescue/?tune=1
 - **Playtest stats:** https://jamesnidecker.github.io/rotor-rescue/?stats=1
+- **Art & sound picks (milestone 2):** https://jamesnidecker.github.io/rotor-rescue/preview.html
 
 Tap = up a little · hold = hover · let go = drop. On a computer, the mouse
 button or the space bar is your finger (Esc or P pauses).
@@ -53,9 +54,11 @@ default tuning.
 
 | Folder | What |
 |---|---|
-| `src/kit/` | **8Blip Kit**: reusable parts for all our games (palette, font, HUD, pause menu, page setup / side strips, tuning and stats panels). Knows nothing about helicopters |
+| `src/kit/` | **8Blip Kit**: reusable parts for all our games (palette, font, pixel-art drawing, 8-bit synthesiser and music player, HUD, pause menu, page setup / side strips, tuning and stats panels). Knows nothing about helicopters |
 | `src/game/` | Rotor Rescue itself: flight physics, collisions, scenes |
 | `src/game/levels/` | One data file per level (buildings, people, helipad) |
+| `src/game/art/`, `src/game/audio/` | Pixel art (drawn in code) and sound/music candidates |
+| `src/preview/` | The art & sound picks page (`preview.html`) |
 | `docs/` | Design, style guide, playbook, build briefs |
 
 ## Credits
