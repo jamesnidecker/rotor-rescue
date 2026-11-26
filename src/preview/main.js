@@ -12,6 +12,7 @@ import { PERSON_FRAMES } from '../game/art/people.js';
 import { drawBuilding, drawSky, drawCloud, drawClouds, drawSkyline, SKIES, CLOUDS } from '../game/art/city.js';
 import { SFX } from '../game/audio/sfx.js';
 import { TITLE_THEMES } from '../game/audio/titleTheme.js';
+import { LEVEL_THEMES } from '../game/audio/levelMusic.js';
 import { buildWorld } from '../game/world.js';
 import { getLevel } from '../game/levels/index.js';
 import { levelCanvas } from '../game/art/level.js';
@@ -219,6 +220,22 @@ TITLE_THEMES.forEach((song, i) => {
   themeBtns.push(pick);
   app.append(el('div', { className: 'sound' }, play, pick));
 });
+app.append(el('h2', {}, '7b. Music while flying'));
+app.append(el('p', { className: 'note' }, 'Three drafts of the in-level music, about 40 seconds each, looping. It should be fun to fly to and not annoying after many rounds. Tap the one you like best.'));
+const levelBtns = [];
+LEVEL_THEMES.forEach((song, i) => {
+  const play = el('button', { className: 'play' }, `▶ ${song.name}`);
+  play.addEventListener('click', () => music.play(song));
+  const pick = el('button', {}, 'Favourite');
+  pick.dataset.level = String(i + 1);
+  pick.addEventListener('click', () => {
+    picks.levelMusic = String(i + 1);
+    savePicks();
+    refresh();
+  });
+  levelBtns.push(pick);
+  app.append(el('div', { className: 'sound' }, play, pick));
+});
 const stopBtn = el('button', {}, '■ Stop music');
 stopBtn.addEventListener('click', () => music.stop());
 app.append(el('div', {}, stopBtn));
@@ -242,6 +259,7 @@ copyBtn.addEventListener('click', async () => {
     `sky: ${picks.sky} (${SKIES[picks.sky].name})`,
     `clouds: ${picks.clouds} (${CLOUDS[picks.clouds].name})`,
     `title theme: ${picks.theme ? TITLE_THEMES[Number(picks.theme) - 1]?.name ?? picks.theme : '-'}`,
+    `music while flying: ${picks.levelMusic ? LEVEL_THEMES[Number(picks.levelMusic) - 1]?.name : '-'}`,
     `notes: ${picks.notes || '-'}`,
   ];
   status.textContent = (await copyText(lines.join('\n'))) ? 'Copied! Paste it to Claude.' : 'Copy failed';
@@ -252,5 +270,6 @@ function refresh() {
   document.querySelectorAll('.card').forEach((c) => c.classList.toggle('picked', picks[c.dataset.group] === c.dataset.key));
   soundButtons.forEach((b) => b.classList.toggle('picked', picks[b.dataset.sound] === b.dataset.key));
   themeBtns.forEach((b) => b.classList.toggle('picked', picks.theme === b.dataset.theme));
+  levelBtns.forEach((b) => b.classList.toggle('picked', picks.levelMusic === b.dataset.level));
 }
 refresh();

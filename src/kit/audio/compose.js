@@ -12,6 +12,7 @@ export const TONES = {
   G: ['G', 'B', 'D'],
   Am: ['A', 'C', 'E'],
   Bb: ['Bb', 'D', 'F'],
+  Bm: ['B', 'D', 'F#'],
 };
 
 export function buildSong({ name, bpm, chords, melody, lead = 'square', leadVol = 0.16, arp = 'pulse12', arpVol = 0.06, bassVol = 0.45, drums, drumVol = 0.8, arpOctave = 4, bassStyle = 'octave' }) {

@@ -66,11 +66,12 @@ export function createMusicPlayer(synth) {
     gain = null;
   }
 
-  function play(song) {
+  function play(song, volume = 1) {
     stop();
     const ctx = synth.ctx;
     if (!ctx) return;
     gain = ctx.createGain();
+    gain.gain.value = volume;
     gain.connect(synth.master);
     const { list, length } = events(song);
     const start = ctx.currentTime + 0.08;

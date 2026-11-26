@@ -64,6 +64,7 @@ export default class GameScene extends Phaser.Scene {
     // restart, so anything not reset would leak into the next round.
     this.paused = false;
     this.leaving = false;
+    this.musicWasOn = false;
     this.tapOkAt = 0;
     this.landTarget = null;
     this.fingers = new Set();
@@ -155,6 +156,8 @@ export default class GameScene extends Phaser.Scene {
   pauseGame() {
     if (!this.canPause()) return;
     sound.play('click');
+    this.musicWasOn = this.state === 'flying';
+    sound.stopMusic();
     this.paused = true;
     this.time.paused = true;
     this.tweens.pauseAll();
@@ -171,6 +174,7 @@ export default class GameScene extends Phaser.Scene {
     this.tweens.resumeAll();
     this.menu.hide();
     // Hover in place until the next touch, so resuming is never a surprise drop.
+    if (this.state === 'flying' && this.musicWasOn) sound.music('level');
     if (this.state === 'flying') {
       this.heli.vy = 0;
       this.heli.waitingForFirstTouch = true;
@@ -180,6 +184,7 @@ export default class GameScene extends Phaser.Scene {
 
   restartRun() {
     if (this.state === 'flying') this.endAttempt('quit');
+    sound.stopMusic();
     // Un-pause the scene clock first: it survives a scene restart, and a paused
     // clock would freeze the READY / 3 2 1 / GO! countdown.
     this.paused = false;
@@ -293,6 +298,7 @@ export default class GameScene extends Phaser.Scene {
         () => {
           this.message('GO!', PAL.green, 24);
           this.state = 'flying';
+          sound.music('level'); // in-level music starts at GO!
           this.acc = 0;
           // A finger that is already down when GO! appears counts as holding.
           if (this.fingers.size || this.spaceDown) {
@@ -322,6 +328,7 @@ export default class GameScene extends Phaser.Scene {
   crash() {
     this.state = 'crashed';
     this.endAttempt('crash');
+    sound.stopMusic(); // silence for the explosion; music restarts at the next GO!
     sound.play('crash');
     release(this.heli);
     this.heliGfx.setVisible(false);
@@ -379,6 +386,7 @@ export default class GameScene extends Phaser.Scene {
 
   startLanding() {
     this.state = 'landing';
+    sound.stopMusic(); // the level-complete jingle takes over
     this.endAttempt('finish');
     release(this.heli);
     const pad = this.world.pad;

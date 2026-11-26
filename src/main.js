@@ -17,6 +17,7 @@ async function start() {
     scenes: [BootScene, TitleScene, GameScene],
   });
   window.__game = game; // handy for debugging in the browser console
+  window.__sound = sound;
 
   if (DEV_TOOLS) {
     const params = new URLSearchParams(window.location.search);

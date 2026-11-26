@@ -5,7 +5,8 @@ import { createMusicPlayer } from './music.js';
 // switches saved in the store (pause menu). Browsers only allow sound after a
 // tap, so nothing plays until unlock() has been called from a tap.
 //   sfx:   { name: [voices] }      songs: { name: song }
-export function createSound({ store, sfx = {}, songs = {}, volume = 0.3 }) {
+//   songVolume: { name: 0..1 } (e.g. quieter music while playing)
+export function createSound({ store, sfx = {}, songs = {}, songVolume = {}, volume = 0.3 }) {
   const synth = createSynth({ volume });
   const player = createMusicPlayer(synth);
   let unlocked = false;
@@ -14,7 +15,7 @@ export function createSound({ store, sfx = {}, songs = {}, volume = 0.3 }) {
   const settings = () => store.getSettings();
 
   function startWanted() {
-    if (unlocked && wanted && settings().music && !player.playing) player.play(songs[wanted]);
+    if (unlocked && wanted && settings().music && !player.playing) player.play(songs[wanted], songVolume[wanted] ?? 1);
   }
 
   // Unlock on a touch / click / key anywhere on the page. iPhones only accept
