@@ -29,8 +29,29 @@ export function createSynth({ volume = 0.3 } = {}) {
       const d = noiseBuf.getChannelData(0);
       for (let i = 0; i < len; i++) d[i] = Math.random() * 2 - 1;
     }
-    if (ctx.state === 'suspended') ctx.resume();
+    if (ctx.state !== 'running') ctx.resume().catch(() => {});
     return ctx;
+  }
+
+  // Called from inside a tap: wakes the audio up the way iPhones need it
+  // (resume + play a tiny silent sound in the same tap), and asks iOS to play
+  // even when the silent switch is on (Safari 17+; older iPhones ignore this).
+  function unlockFromTap() {
+    try {
+      if (navigator.audioSession) navigator.audioSession.type = 'playback';
+    } catch {
+      /* not supported */
+    }
+    if (!ensure()) return Promise.resolve(false);
+    const silent = ctx.createBuffer(1, 1, ctx.sampleRate);
+    const src = ctx.createBufferSource();
+    src.buffer = silent;
+    src.connect(ctx.destination);
+    src.start(0);
+    return ctx.resume().then(
+      () => ctx.state === 'running',
+      () => false
+    );
   }
 
   function pulseWave(duty) {
@@ -87,6 +108,10 @@ export function createSynth({ volume = 0.3 } = {}) {
 
   return {
     unlock: () => ensure(),
+    unlockFromTap,
+    get running() {
+      return !!ctx && ctx.state === 'running';
+    },
     get ctx() {
       return ensure();
     },

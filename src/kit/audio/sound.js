@@ -17,18 +17,37 @@ export function createSound({ store, sfx = {}, songs = {}, volume = 0.3 }) {
     if (unlocked && wanted && settings().music && !player.playing) player.play(songs[wanted]);
   }
 
-  // Unlock on the first touch / click / key anywhere on the page.
-  const unlockOnce = () => {
+  // Unlock on a touch / click / key anywhere on the page. iPhones only accept
+  // some moments of a tap (often the finger lifting), so keep trying on every
+  // gesture until the audio is really running.
+  const GESTURES = ['touchstart', 'touchend', 'pointerdown', 'pointerup', 'click', 'keydown'];
+  const tryUnlock = () => {
     if (unlocked) return;
-    synth.unlock();
-    unlocked = true;
-    startWanted();
+    synth.unlockFromTap().then((running) => {
+      if (!running || unlocked) return;
+      unlocked = true;
+      GESTURES.forEach((ev) => window.removeEventListener(ev, tryUnlock, true));
+      startWanted();
+    });
   };
-  for (const ev of ['pointerdown', 'touchend', 'keydown']) {
-    window.addEventListener(ev, unlockOnce, { capture: true, passive: true });
-  }
+  GESTURES.forEach((ev) => window.addEventListener(ev, tryUnlock, { capture: true, passive: true }));
+  const unlockOnce = tryUnlock;
   // Silence while the app/tab is in the background.
-  document.addEventListener('visibilitychange', () => (document.hidden ? synth.suspend() : synth.resume()));
+  document.addEventListener('visibilitychange', () => {
+    if (document.hidden) synth.suspend();
+    else {
+      synth.resume();
+      // iOS can leave audio stopped after switching apps; then the next tap
+      // unlocks it again and the music restarts.
+      setTimeout(() => {
+        if (unlocked && !synth.running) {
+          unlocked = false;
+          player.stop();
+          GESTURES.forEach((ev) => window.addEventListener(ev, tryUnlock, { capture: true, passive: true }));
+        }
+      }, 300);
+    }
+  });
 
   return {
     get unlocked() {
