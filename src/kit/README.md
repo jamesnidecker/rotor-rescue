@@ -12,6 +12,7 @@ about a specific game** (no helicopters, no levels). Game code lives in
 | `pixels.js` | Pixel art from text maps (one letter per palette colour), dithering, seeded random |
 | `audio/synth.js` | 8-bit synthesiser: square, pulse, triangle, noise voices; sound effects as data |
 | `audio/music.js` | Chiptune music player (tracks of notes + drum patterns, loops) |
+| `icons.js` | Small pixel icons (music note, speaker) + an automatic "off" version |
 | `widgets.js` | Square bevelled button, pixel pause icon |
 | `hud.js` | Arcade HUD bar: 1UP + score, LEVEL, lives, a counter, pause button |
 | `pauseMenu.js` | Pause overlay: RESUME, RESTART, MUSIC / SFX switches |

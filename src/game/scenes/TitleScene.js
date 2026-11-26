@@ -1,11 +1,11 @@
 import Phaser from 'phaser';
 import { PAL, TEXT } from '../../kit/palette.js';
 import { centerText, score6, blink } from '../../kit/text.js';
-import { GAME_H } from '../config.js';
+import { GAME_W, GAME_H } from '../config.js';
 import { store } from '../store.js';
 import { sound } from '../sound.js';
-import { makeButton } from '../../kit/widgets.js';
-import { setText } from '../../kit/text.js';
+import { spriteCanvas } from '../../kit/pixels.js';
+import { ICON_MUSIC, ICON_SPEAKER, offVersion } from '../../kit/icons.js';
 
 export default class TitleScene extends Phaser.Scene {
   constructor() {
@@ -31,22 +31,31 @@ export default class TitleScene extends Phaser.Scene {
 
     centerText(this, GAME_H - 24, '8BLIP ARCADE', PAL.midGrey);
 
-    // MUSIC and SFX switches (same settings as the pause menu).
-    const onOff = (v) => (v ? 'ON' : 'OFF');
-    const toggle = (x, key, label) => {
-      const btn = makeButton(this, x, GAME_H - 64, 82, 24, `${label} ${onOff(store.getSettings()[key])}`, () => {
+    // Small MUSIC and SFX icons in the bottom corners (same settings as the
+    // pause menu). White = on, grey with a red stripe = off.
+    const iconTex = (key, rows) => {
+      if (!this.textures.exists(key)) this.textures.addCanvas(key, spriteCanvas(rows));
+      return key;
+    };
+    const toggle = (x, key, rows) => {
+      const on = iconTex(`icon-${key}-on`, rows);
+      const off = iconTex(`icon-${key}-off`, offVersion(rows));
+      const img = this.add.image(x, GAME_H - 20, store.getSettings()[key] ? on : off).setOrigin(0);
+      // Bigger invisible touch area around the small icon.
+      const zone = this.add.zone(x - 9, GAME_H - 32, 28, 30).setOrigin(0).setInteractive();
+      zone.isUI = true;
+      zone.on('pointerdown', () => {
         const st = store.getSettings();
         st[key] = !st[key];
         store.setSettings(st);
-        setText(btn.label, `${label} ${onOff(st[key])}`);
+        img.setTexture(st[key] ? on : off);
         sound.applySettings();
         if (key === 'music' && st.music) sound.music('title');
         sound.play('click');
       });
-      return btn;
     };
-    toggle(6, 'music', 'MUSIC');
-    toggle(92, 'sfx', 'SFX');
+    toggle(8, 'music', ICON_MUSIC);
+    toggle(GAME_W - 17, 'sfx', ICON_SPEAKER);
 
     // Title theme. Browsers only allow sound after a tap, so on the very first
     // visit the first tap starts the music and the next tap starts the game.
