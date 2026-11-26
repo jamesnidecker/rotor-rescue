@@ -18,7 +18,7 @@ import {
 import { tuning } from '../tuning.js';
 import { store, stats } from '../store.js';
 import { getLevel } from '../levels/index.js';
-import { buildWorld, checkCrash, checkPickups, reachedHelipad, pastLevelEnd, PERSON_W, PERSON_H } from '../world.js';
+import { buildWorld, checkCrash, checkPickups, reachedHelipad, pastLevelEnd, applyCeiling, PERSON_W, PERSON_H } from '../world.js';
 import { createHeli, press, release, stepHeli } from '../physics.js';
 import { lifeIcon, personIcon } from '../icons.js';
 import { sound } from '../sound.js';
@@ -387,7 +387,8 @@ export default class GameScene extends Phaser.Scene {
 
   startLanding() {
     this.state = 'landing';
-    sound.stopMusic(); // the level-complete jingle takes over
+    sound.stopMusic();
+    sound.play('victory'); // reward tune during the landing, into the score screen
     this.endAttempt('finish');
     release(this.heli);
     const pad = this.world.pad;
@@ -431,7 +432,6 @@ export default class GameScene extends Phaser.Scene {
     const rescuePts = n * POINTS_PERSON; // already added at pickup
     const bonus = perfect ? rescuePts : 0; // all saved -> rescue points doubled
     this.run.score += bonus + POINTS_HELIPAD;
-    this.time.delayedCall(150, () => sound.play('levelClear'));
     store.submitScore(this.run.score);
     this.updateHud();
 
@@ -451,6 +451,8 @@ export default class GameScene extends Phaser.Scene {
     row('RESCUED', `${n}/${total}`);
     row('PEOPLE', score6(rescuePts));
     if (perfect) {
+      // Extra reward jingle for saving everyone, after the victory tune.
+      this.time.delayedCall(700, () => sound.play('levelClear'));
       const p = o(centerText(this, y, 'PERFECT RESCUE!', TEXT.message));
       blink(this, p);
       y += 16;
@@ -501,6 +503,10 @@ export default class GameScene extends Phaser.Scene {
 
   physicsStep(dt) {
     stepHeli(this.heli, tuning, dt);
+    if (applyCeiling(this.heli, tuning) && this.time.now - (this.lastBump || 0) > 250) {
+      this.lastBump = this.time.now;
+      sound.play('bump');
+    }
     for (const p of checkPickups(this.world, this.heli, this.rescued, tuning)) this.pickup(p);
     if (reachedHelipad(this.world, this.heli, tuning)) return this.startLanding();
     if (checkCrash(this.world, this.heli, tuning) || pastLevelEnd(this.world, this.heli)) this.crash();

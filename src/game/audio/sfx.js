@@ -2,6 +2,18 @@ import { noteHz as n } from '../../kit/audio/synth.js';
 
 // Sound effect candidates (2-3 versions each) for Jozo and the kids to pick.
 // Each is a list of synth voices (see src/kit/audio/synth.js).
+
+// A run of notes as voices: [[note, seconds], ...] starting at `t0`.
+function seq(notes, wave, vol, t0 = 0, gate = 0.9) {
+  const out = [];
+  let t = t0;
+  for (const [note, d] of notes) {
+    if (note !== 'r') out.push({ t, wave, f0: n(note), dur: d * gate, vol, hold: 0.5 });
+    t += d;
+  }
+  return out;
+}
+
 export const SFX = {
   tap: {
     label: 'Tap (lift)',
@@ -185,7 +197,7 @@ export const SFX = {
     },
   },
   levelClear: {
-    label: 'Level complete jingle',
+    label: 'PERFECT RESCUE! (all saved) jingle',
     A: {
       name: 'Fanfare',
       v: [
@@ -210,6 +222,45 @@ export const SFX = {
         { t: 0.72, wave: 'pulse25', f0: n('C7'), dur: 0.8, vol: 0.2, hold: 0.6 },
         ...['C3', 'G3', 'C4', 'G3'].map((x, i) => ({ t: i * 0.24, wave: 'triangle', f0: n(x), dur: 0.2, vol: 0.5 })),
         { t: 0.96, wave: 'triangle', f0: n('C3'), dur: 0.6, vol: 0.5 },
+      ],
+    },
+  },
+  bump: {
+    label: 'Bumping the top of the screen',
+    A: { name: 'Bonk', v: [{ wave: 'triangle', f0: 260, f1: 140, dur: 0.12, vol: 0.6 }] },
+    B: { name: 'Soft thud', v: [{ wave: 'noise', filter: 900, dur: 0.08, vol: 0.35 }, { wave: 'triangle', f0: 180, f1: 90, dur: 0.1, vol: 0.4 }] },
+  },
+  victory: {
+    label: 'Reaching the helipad (reward tune, ~3-4 s)',
+    A: {
+      name: 'Victory fanfare',
+      v: [
+        // ta-ta-ta TAAA, ta-ta TAAAA
+        ...seq([['G5', 0.12], ['G5', 0.12], ['G5', 0.12], ['C6', 0.6], ['A5', 0.12], ['B5', 0.12], ['C6', 0.12], ['E6', 0.45], ['D6', 0.15], ['E6', 1.2]], 'square', 0.2),
+        ...seq([['E5', 0.12], ['E5', 0.12], ['E5', 0.12], ['G5', 0.6], ['F5', 0.36], ['G5', 0.6], ['G5', 1.2]], 'pulse25', 0.1),
+        ...seq([['C3', 0.36], ['C3', 0.6], ['F3', 0.36], ['G3', 0.6], ['C3', 1.2]], 'triangle', 0.5),
+        { t: 0.36, wave: 'noise', filter: 3000, dur: 0.15, vol: 0.3 },
+        { t: 1.32, wave: 'noise', filter: 3000, dur: 0.15, vol: 0.3 },
+        { t: 1.92, wave: 'noise', filter: 9000, highpass: true, dur: 0.6, vol: 0.12 },
+      ],
+    },
+    B: {
+      name: 'Mission complete',
+      v: [
+        // rising arpeggios, then a big held chord
+        ...seq(['C5', 'E5', 'G5', 'C6', 'D5', 'F5', 'A5', 'D6', 'E5', 'G5', 'B5', 'E6'].map((x) => [x, 0.1]), 'pulse25', 0.18),
+        ...seq([['G6', 0.3], ['F6', 0.15], ['E6', 0.15], ['G6', 1.4]], 'square', 0.18, 1.2),
+        ...seq([['C6', 0.6], ['B5', 1.4]], 'pulse12', 0.08, 1.2),
+        ...seq([['C3', 0.4], ['D3', 0.4], ['E3', 0.4], ['G3', 0.6], ['C3', 1.4]], 'triangle', 0.5),
+      ],
+    },
+    C: {
+      name: 'Happy landing',
+      v: [
+        // bouncy, playful, ends with a little "ta-da!"
+        ...seq([['E6', 0.15], ['C6', 0.15], ['G5', 0.15], ['C6', 0.15], ['E6', 0.15], ['G6', 0.3], ['r', 0.15], ['A6', 0.15], ['G6', 0.15], ['E6', 0.15], ['F6', 0.15], ['D6', 0.3], ['r', 0.15], ['C6', 0.2], ['G6', 0.2], ['C7', 1.0]], 'pulse25', 0.18),
+        ...seq([['C3', 0.3], ['G3', 0.3], ['C3', 0.3], ['G3', 0.3], ['F3', 0.3], ['G3', 0.6], ['C3', 0.4], ['C4', 1.0]], 'triangle', 0.5),
+        { t: 2.95, wave: 'noise', filter: 9000, highpass: true, dur: 0.5, vol: 0.12 },
       ],
     },
   },

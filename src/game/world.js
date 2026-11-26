@@ -51,10 +51,21 @@ function overlap(a, b) {
   return a.x < b.x + b.w && a.x + a.w > b.x && a.y < b.y + b.h && a.y + a.h > b.y;
 }
 
-// Returns null, or what was hit.
+// The top of the screen is a soft ceiling (Jozo, 2026-11-26): the helicopter
+// bumps against it and stops going up, instead of crashing.
+// Returns true when it bumped this step.
+export function applyCeiling(heli, t) {
+  const hb = hitbox(heli, t.hitboxPct);
+  if (hb.y >= CEILING_Y) return false;
+  heli.y += CEILING_Y - hb.y;
+  const wasRising = heli.vy < 0;
+  if (wasRising) heli.vy = 0;
+  return wasRising;
+}
+
+// Returns null, or what was hit (buildings, helipad side, ground).
 export function checkCrash(world, heli, t) {
   const hb = hitbox(heli, t.hitboxPct);
-  if (hb.y < CEILING_Y) return 'ceiling';
   if (hb.y + hb.h > GROUND_Y) return 'ground';
   for (const s of world.solids) if (overlap(hb, s)) return s.kind;
   return null;

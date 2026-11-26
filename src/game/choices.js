@@ -17,6 +17,8 @@ export const CHOICES = {
     landing: 'B', // Touchdown
     levelClear: 'B', // Bouncy
     click: 'B', // Blip
+    bump: 'A', // Bonk — Claude's pick until the kids choose
+    victory: 'A', // Victory fanfare — Claude's pick until the kids choose
   },
 };
 

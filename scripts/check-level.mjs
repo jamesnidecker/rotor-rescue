@@ -2,7 +2,7 @@
 // with the default tuning and only coarse, human-speed inputs?
 // Usage: npm run check   (runs a small beam search over tap / hold / let go)
 import { LEVELS } from '../src/game/levels/index.js';
-import { buildWorld, checkCrash, checkPickups, reachedHelipad, pastLevelEnd } from '../src/game/world.js';
+import { buildWorld, checkCrash, checkPickups, reachedHelipad, pastLevelEnd, applyCeiling } from '../src/game/world.js';
 import { createHeli, press, release, stepHeli } from '../src/game/physics.js';
 import { DEFAULT_TUNING } from '../src/game/tuning.js';
 
@@ -28,6 +28,7 @@ function run(level, t, decisionSec, beamWidth) {
         else if (action === 'tap' || !n.heli.held) press(n.heli, t);
         for (let i = 0; i < stepsPerDecision; i++) {
           stepHeli(n.heli, t, DT);
+          applyCeiling(n.heli, t);
           for (const p of checkPickups(world, n.heli, n.rescued, t)) n.rescued.add(p.id);
           if (reachedHelipad(world, n.heli, t)) { n.done = true; break; }
           if (checkCrash(world, n.heli, t) || pastLevelEnd(world, n.heli)) { n.alive = false; break; }
