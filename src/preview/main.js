@@ -183,7 +183,7 @@ app.append(el('p', { className: 'note' }, 'Tap ▶ to listen, then tap the one y
 const soundButtons = [];
 for (const [key, s] of Object.entries(SFX)) {
   const box = el('div', { className: 'sound' }, el('div', { className: 'title' }, s.label));
-  for (const v of ['A', 'B', 'C', 'D', 'E', 'F']) {
+  for (const v of ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I']) {
     if (!s[v]) continue;
     const play = el('button', { className: 'play' }, `▶ ${v}`);
     play.addEventListener('click', () => synth.play(s[v].v));

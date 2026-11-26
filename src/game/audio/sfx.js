@@ -105,6 +105,44 @@ export const SFX = {
         { wave: 'triangle', f0: 80, f1: 30, dur: 0.7, vol: 0.9 },
       ],
     },
+    // Round 3 (Jozo: "a bit too short, more big explosion would be cool") — ~2 s
+    G: {
+      name: 'Mega explosion',
+      v: [
+        { wave: 'noise', filter: 9000, filter1: 400, dur: 0.3, vol: 1.0 },
+        { t: 0.05, wave: 'noise', filter: 2500, filter1: 50, dur: 2.2, vol: 0.9, hold: 0.25 },
+        { t: 0.25, wave: 'noise', filter: 4000, filter1: 100, dur: 1.0, vol: 0.6 },
+        { wave: 'triangle', f0: 150, f1: 25, dur: 1.8, vol: 1.0, hold: 0.2 },
+        { wave: 'square', f0: 220, f1: 30, dur: 0.7, vol: 0.25 },
+      ],
+    },
+    H: {
+      name: 'Boom boom boom',
+      v: [
+        { wave: 'noise', filter: 7000, filter1: 150, dur: 0.7, vol: 1.0 },
+        { wave: 'triangle', f0: 140, f1: 30, dur: 0.6, vol: 1.0 },
+        { t: 0.45, wave: 'noise', filter: 4000, filter1: 100, dur: 0.7, vol: 0.75 },
+        { t: 0.45, wave: 'triangle', f0: 110, f1: 28, dur: 0.6, vol: 0.8 },
+        { t: 0.9, wave: 'noise', filter: 2500, filter1: 60, dur: 1.2, vol: 0.6 },
+        { t: 0.9, wave: 'triangle', f0: 90, f1: 25, dur: 1.0, vol: 0.6 },
+      ],
+    },
+    I: {
+      name: 'Explosion + falling debris',
+      v: [
+        { wave: 'noise', filter: 8000, filter1: 200, dur: 0.5, vol: 1.0 },
+        { t: 0.05, wave: 'noise', filter: 1800, filter1: 50, dur: 2.0, vol: 0.85, hold: 0.2 },
+        { wave: 'triangle', f0: 130, f1: 25, dur: 1.5, vol: 1.0, hold: 0.15 },
+        ...[0.5, 0.68, 0.8, 1.0, 1.15, 1.4, 1.6].map((t, i) => ({
+          t,
+          wave: 'square',
+          f0: 900 - i * 90,
+          f1: 500 - i * 50,
+          dur: 0.05,
+          vol: 0.12 - i * 0.012,
+        })),
+      ],
+    },
   },
   countdown: {
     label: 'READY! 3 2 1 GO!',
