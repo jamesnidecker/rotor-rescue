@@ -69,6 +69,25 @@ export function createSound({ store, sfx = {}, songs = {}, volume = 0.3 }) {
       wanted = null;
       player.stop();
     },
+    // For the ?tune=1 sound check: what is the audio doing on this device?
+    debugInfo() {
+      const c = synth.started ? synth.ctx : null;
+      return {
+        audioCreated: !!c,
+        audioState: c ? c.state : 'not created yet',
+        unlocked,
+        musicWanted: wanted || 'none',
+        musicPlaying: player.playing,
+        settings: settings(),
+        audioSession: navigator.audioSession ? navigator.audioSession.type : 'not supported',
+        userAgent: navigator.userAgent,
+      };
+    },
+    // A beep played straight from a button tap (the most direct way).
+    testBeep() {
+      synth.unlockFromTap();
+      synth.play([{ wave: 'square', f0: 880, dur: 0.25, vol: 0.4, hold: 0.5 }]);
+    },
     // Call after the MUSIC / SFX switches change.
     applySettings() {
       if (!settings().music) player.stop();

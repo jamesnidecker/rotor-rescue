@@ -4,6 +4,7 @@ import { createArcadeGame } from './kit/page.js';
 import { GAME_W, GAME_H, DEV_TOOLS } from './game/config.js';
 import { tune } from './game/tuning.js';
 import { stats } from './game/store.js';
+import { sound } from './game/sound.js';
 import BootScene from './game/scenes/BootScene.js';
 import TitleScene from './game/scenes/TitleScene.js';
 import GameScene from './game/scenes/GameScene.js';
@@ -22,6 +23,7 @@ async function start() {
     if (params.has('tune')) {
       const { mountTunePanel } = await import('./kit/dev/tunePanel.js');
       mountTunePanel(tune, {
+        soundCheck: { info: () => sound.debugInfo(), beep: () => sound.testBeep() },
         // eslint-disable-next-line no-undef
         build: typeof __BUILD__ !== 'undefined' ? __BUILD__ : 'dev',
         onRestart: () => {

@@ -4,6 +4,7 @@ import { copyText } from './clipboard.js';
 // Changes apply instantly while playing and are saved on this device.
 // opts.onRestart (optional): adds a "Restart game" button.
 // opts.build (optional): build label shown at the top.
+// opts.soundCheck (optional): { info() -> object, beep() } adds a sound check box.
 export function mountTunePanel(tune, opts = {}) {
   const { spec: TUNING_SPEC, values: tuning } = tune;
   const toggle = document.createElement('button');
@@ -68,6 +69,41 @@ export function mountTunePanel(tune, opts = {}) {
   mk('Close', () => setOpen(false));
   actions.appendChild(note);
   panel.prepend(actions);
+  if (opts.soundCheck) {
+    const box = document.createElement('div');
+    box.className = 'dev-note';
+    box.style.margin = '6px 0 10px';
+    const out = document.createElement('pre');
+    out.style.cssText = 'white-space: pre-wrap; margin: 4px 0; font-size: 11px; color: #ffd93b;';
+    const show = () => {
+      const i = opts.soundCheck.info();
+      out.textContent = Object.entries(i)
+        .map(([k, v]) => `${k}: ${typeof v === 'object' ? JSON.stringify(v) : v}`)
+        .join('\n');
+    };
+    const row = document.createElement('div');
+    row.className = 'dev-actions';
+    const mkb = (label, fn) => {
+      const b = document.createElement('button');
+      b.className = 'dev-btn';
+      b.textContent = label;
+      b.addEventListener('click', fn);
+      row.appendChild(b);
+    };
+    mkb('Test beep', () => {
+      opts.soundCheck.beep();
+      setTimeout(show, 300);
+    });
+    mkb('Refresh sound check', show);
+    mkb('Copy sound check', async () => {
+      show();
+      await copyText(out.textContent);
+      out.textContent += '\n(copied)';
+    });
+    box.append('Sound check:', row, out);
+    panel.insertBefore(box, panel.children[1] || null);
+    show();
+  }
   if (opts.build) {
     const b = document.createElement('div');
     b.className = 'dev-note';
