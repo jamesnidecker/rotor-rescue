@@ -4,16 +4,18 @@ import { store } from './store.js';
 // Everything Jozo can adjust in the ?tune=1 panel. Units are game pixels and seconds.
 // Defaults = Jozo's values from his play test (2026-11-24), with a softer drop
 // and an 80% hitbox after the first playtest with his kids (7 and 10).
+// 2026-11-26: drop softer again (gravity 320, max fall 180); tap impulse 134
+// keeps the same lift per tap (about 28 px).
 export const TUNING_SPEC = [
-  { key: 'gravity', label: 'Gravity', min: 200, max: 1500, step: 10, def: 350, unit: 'px/s²' },
-  { key: 'tapImpulse', label: 'Tap impulse (lift)', min: 50, max: 400, step: 5, def: 140, unit: 'px/s' },
+  { key: 'gravity', label: 'Gravity', min: 200, max: 1500, step: 10, def: 320, unit: 'px/s²' },
+  { key: 'tapImpulse', label: 'Tap impulse (lift)', min: 50, max: 400, step: 5, def: 134, unit: 'px/s' },
   { key: 'hoverStrength', label: 'Hover strength', min: 1, max: 30, step: 0.5, def: 10, unit: '/s' },
   { key: 'forwardSpeed', label: 'Forward speed', min: 20, max: 150, step: 1, def: 60, unit: 'px/s' },
   { key: 'hitboxPct', label: 'Hitbox size', min: 40, max: 100, step: 1, def: 80, unit: '%' },
   { key: 'pickupReach', label: 'Pickup reach', min: 4, max: 60, step: 1, def: 20, unit: 'px' },
   // Extras (not in the brief, but useful knobs for the same feel):
   { key: 'hoverDelay', label: 'Hold → hover after', min: 0, max: 400, step: 10, def: 150, unit: 'ms' },
-  { key: 'maxFallSpeed', label: 'Max fall speed', min: 100, max: 800, step: 10, def: 210, unit: 'px/s' },
+  { key: 'maxFallSpeed', label: 'Max fall speed', min: 100, max: 800, step: 10, def: 180, unit: 'px/s' },
   // Limited hover — to compare in the playtest (design doc §2):
   //   0 = unlimited, 1 = fixed time per hold, 2 = hover gauge
   { key: 'hoverLimitMode', label: 'Hover limit: 0 off · 1 time per hold · 2 gauge', min: 0, max: 2, step: 1, def: 2, unit: '' },

@@ -4,6 +4,8 @@ import { centerText, score6, blink } from '../../kit/text.js';
 import { GAME_H } from '../config.js';
 import { store } from '../store.js';
 import { sound } from '../sound.js';
+import { makeButton } from '../../kit/widgets.js';
+import { setText } from '../../kit/text.js';
 
 export default class TitleScene extends Phaser.Scene {
   constructor() {
@@ -29,12 +31,30 @@ export default class TitleScene extends Phaser.Scene {
 
     centerText(this, GAME_H - 24, '8BLIP ARCADE', PAL.midGrey);
 
+    // MUSIC and SFX switches (same settings as the pause menu).
+    const onOff = (v) => (v ? 'ON' : 'OFF');
+    const toggle = (x, key, label) => {
+      const btn = makeButton(this, x, GAME_H - 64, 82, 24, `${label} ${onOff(store.getSettings()[key])}`, () => {
+        const st = store.getSettings();
+        st[key] = !st[key];
+        store.setSettings(st);
+        setText(btn.label, `${label} ${onOff(st[key])}`);
+        sound.applySettings();
+        if (key === 'music' && st.music) sound.music('title');
+        sound.play('click');
+      });
+      return btn;
+    };
+    toggle(6, 'music', 'MUSIC');
+    toggle(92, 'sfx', 'SFX');
+
     // Title theme. Browsers only allow sound after a tap, so on the very first
     // visit the first tap starts the music and the next tap starts the game.
     // (Later visits: music plays right away and one tap starts the game.)
     sound.music('title');
     let waitingForMusic = !sound.unlocked && store.getSettings().music;
-    const start = () => {
+    const start = (pointer, over) => {
+      if (over && over.some((o) => o.isUI)) return; // tapped a switch
       if (waitingForMusic) {
         waitingForMusic = false; // this tap unlocked the sound; the theme starts now
         return;
@@ -44,6 +64,6 @@ export default class TitleScene extends Phaser.Scene {
       this.scene.start('game', { fresh: true });
     };
     this.input.on('pointerdown', start);
-    this.input.keyboard?.on('keydown-SPACE', start);
+    this.input.keyboard?.on('keydown-SPACE', () => start());
   }
 }
