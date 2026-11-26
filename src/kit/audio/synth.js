@@ -101,6 +101,16 @@ export function createSynth({ volume = 0.3 } = {}) {
       const at = ctx.currentTime + 0.005;
       for (const v of sfx) voice(v, at);
     },
+    // Pause / resume all sound (e.g. when the app goes to the background).
+    suspend() {
+      if (ctx && ctx.state === 'running') ctx.suspend();
+    },
+    resume() {
+      if (ctx && ctx.state === 'suspended') ctx.resume();
+    },
+    get started() {
+      return !!ctx;
+    },
     setVolume(v) {
       if (ensure()) master.gain.value = v;
     },

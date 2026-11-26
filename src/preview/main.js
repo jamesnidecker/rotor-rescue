@@ -14,6 +14,7 @@ import { SFX } from '../game/audio/sfx.js';
 import { TITLE_THEMES } from '../game/audio/titleTheme.js';
 import { buildWorld } from '../game/world.js';
 import { getLevel } from '../game/levels/index.js';
+import { levelCanvas } from '../game/art/level.js';
 import { GAME_W, GAME_H, GROUND_Y, HUD_H } from '../game/config.js';
 
 const store = createStore('rotor-rescue.');
@@ -42,31 +43,7 @@ const scene = el('canvas', { className: 'scene', width: GAME_W, height: GAME_H }
 app.append(scene);
 
 const world = buildWorld(getLevel(1));
-const peopleRoofs = new Set(world.people.map((p) => p.roofY + ':' + p.x));
-// Pre-draw the whole level (buildings, helipad, ground) once.
-const strip = el('canvas', { width: world.length + GAME_W, height: GAME_H });
-{
-  const g = strip.getContext('2d');
-  world.solids.forEach((s, i) => {
-    if (s.kind === 'building') {
-      const hasPerson = world.people.some((p) => p.x >= s.x && p.x <= s.x + s.w);
-      drawBuilding(g, s.x, s.y, s.w, s.h, s.shade, hasPerson ? 0 : i + 1);
-    } else {
-      g.fillStyle = HEX.darkGrey;
-      g.fillRect(s.x, s.y, s.w, s.h);
-      g.fillStyle = HEX.midGrey;
-      g.fillRect(s.x, s.y + 4, s.w, 2);
-      g.fillStyle = HEX.orange;
-      g.fillRect(s.x, s.y, s.w, 4);
-    }
-  });
-  g.fillStyle = HEX.darkGrey;
-  g.fillRect(0, GROUND_Y, strip.width, GAME_H - GROUND_Y);
-  g.fillStyle = HEX.green;
-  g.fillRect(0, GROUND_Y, strip.width, 2);
-  g.fillStyle = HEX.midGrey;
-  for (let x = 0; x < strip.width; x += 12) g.fillRect(x, GROUND_Y + 8, 6, 1);
-}
+const strip = levelCanvas(world);
 // Background layers: sky (fixed), far skyline (slow), clouds (slower still).
 const sky = el('canvas', { width: GAME_W, height: GAME_H });
 const skyline = el('canvas', { width: 900, height: GAME_H });
@@ -81,7 +58,6 @@ function redrawBackground() {
   drawClouds(cg, picks.clouds);
 }
 redrawBackground();
-void peopleRoofs;
 
 function safeHeight(x) {
   let top = 190; // open sky: cruise at a comfortable height
@@ -207,7 +183,7 @@ app.append(el('p', { className: 'note' }, 'Tap ▶ to listen, then tap the one y
 const soundButtons = [];
 for (const [key, s] of Object.entries(SFX)) {
   const box = el('div', { className: 'sound' }, el('div', { className: 'title' }, s.label));
-  for (const v of ['A', 'B', 'C']) {
+  for (const v of ['A', 'B', 'C', 'D', 'E', 'F']) {
     if (!s[v]) continue;
     const play = el('button', { className: 'play' }, `▶ ${v}`);
     play.addEventListener('click', () => synth.play(s[v].v));

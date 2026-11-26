@@ -3,7 +3,8 @@ import { centerText, setText } from './text.js';
 import { makeButton } from './widgets.js';
 
 // Pause overlay: RESUME, RESTART, MUSIC and SFX switches (saved in the store).
-// opts: { store, onResume, onRestart, depth }
+// opts: { store, onResume, onRestart, onButton (any tap, e.g. a click sound),
+//         onToggle(key, value) (after MUSIC / SFX change), depth }
 export function createPauseMenu(scene, opts) {
   const W = scene.scale.gameSize.width;
   const H = scene.scale.gameSize.height;
@@ -24,16 +25,18 @@ export function createPauseMenu(scene, opts) {
   const at = (i) => py + 40 + i * 32;
   const toggle = (i, key, label) => {
     const b = makeButton(scene, bx, at(i), bw, 24, `${label} ${onOff(opts.store.getSettings()[key])}`, () => {
+      opts.onButton?.();
       const s = opts.store.getSettings();
       s[key] = !s[key];
       opts.store.setSettings(s);
       setText(b.label, `${label} ${onOff(s[key])}`);
+      opts.onToggle?.(key, s[key]);
     });
     return b;
   };
   const buttons = [
-    makeButton(scene, bx, at(0), bw, 24, 'RESUME', () => opts.onResume?.()),
-    makeButton(scene, bx, at(1), bw, 24, 'RESTART', () => opts.onRestart?.()),
+    makeButton(scene, bx, at(0), bw, 24, 'RESUME', () => (opts.onButton?.(), opts.onResume?.())),
+    makeButton(scene, bx, at(1), bw, 24, 'RESTART', () => (opts.onButton?.(), opts.onRestart?.())),
     toggle(2, 'music', 'MUSIC'),
     toggle(3, 'sfx', 'SFX'),
   ];

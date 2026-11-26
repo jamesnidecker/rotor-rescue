@@ -8,7 +8,6 @@ import {
   GAME_H,
   HUD_H,
   GROUND_Y,
-  GROUND_H,
   HELI_W,
   HELI_H,
   HELI_SCREEN_X,
@@ -22,6 +21,9 @@ import { getLevel } from '../levels/index.js';
 import { buildWorld, checkCrash, checkPickups, reachedHelipad, pastLevelEnd, PERSON_W, PERSON_H } from '../world.js';
 import { createHeli, press, release, stepHeli } from '../physics.js';
 import { lifeIcon, personIcon } from '../icons.js';
+import { sound } from '../sound.js';
+import { CHOICES } from '../choices.js';
+import { levelCanvas, skyCanvas, skylineCanvas, cloudsCanvas, BG_REPEAT } from '../art/level.js';
 
 const DT = 1 / 120; // fixed physics step: same feel at 60 Hz and 120 Hz
 const UI_DEPTH = 100;
@@ -78,55 +80,37 @@ export default class GameScene extends Phaser.Scene {
   // ---------- world drawing ----------
 
   drawWorld() {
-    const len = this.world.length + GAME_W;
-    // Ground: dark grey with a green grass edge.
-    this.add.rectangle(0, GROUND_Y, len, GROUND_H, PAL.darkGrey).setOrigin(0);
-    this.add.rectangle(0, GROUND_Y, len, 2, PAL.green).setOrigin(0);
+    // Background (fixed to the screen, moved by hand for a parallax effect):
+    // sky, a soft far skyline (30% speed) and clouds (10% speed + a slow drift).
+    const tex = (key, make) => (this.textures.exists(key) ? key : (this.textures.addCanvas(key, make()), key));
+    const bg = (key) => this.add.image(0, 0, key).setOrigin(0).setScrollFactor(0);
+    bg(tex(`sky-${CHOICES.sky}`, () => skyCanvas(CHOICES.sky, HUD_H, GROUND_Y))).setDepth(-30);
+    this.skylineImg = bg(tex('skyline', skylineCanvas)).setDepth(-20);
+    this.cloudsImg = bg(tex(`clouds-${CHOICES.clouds}`, () => cloudsCanvas(CHOICES.clouds))).setDepth(-10).setY(HUD_H);
 
-    const bodies = [PAL.midGrey, PAL.lightGrey, PAL.midGrey];
-    for (const s of this.world.solids) {
-      if (s.kind === 'building') {
-        const body = bodies[s.shade % bodies.length];
-        this.add.rectangle(s.x, s.y, s.w, s.h, body).setOrigin(0);
-        this.add.rectangle(s.x, s.y, 2, s.h, body === PAL.lightGrey ? PAL.white : PAL.lightGrey).setOrigin(0);
-        this.add.rectangle(s.x + s.w - 2, s.y, 2, s.h, PAL.darkGrey).setOrigin(0);
-        this.add.rectangle(s.x, s.y, s.w, 1, body === PAL.lightGrey ? PAL.white : PAL.lightGrey).setOrigin(0);
-      } else if (s.kind === 'helipad') {
-        this.add.rectangle(s.x, s.y, s.w, s.h, PAL.darkGrey).setOrigin(0);
-        this.add.rectangle(s.x, s.y, s.w, 4, PAL.orange).setOrigin(0);
-        // landing lights
-        for (let lx = s.x + 2; lx < s.x + s.w - 2; lx += 12) {
-          this.add.rectangle(lx, s.y + 6, 2, 2, PAL.orange).setOrigin(0);
-        }
-      }
+    // The level itself (buildings, helipad, ground) as one picture.
+    this.add.image(0, 0, tex(`level-${this.world.id}`, () => levelCanvas(this.world))).setOrigin(0);
+
+    // Blinking helipad lights.
+    const pad = this.world.pad;
+    this.padLights = [];
+    for (let lx = pad.x + 2; lx < pad.x + pad.w - 2; lx += 12) {
+      this.padLights.push(this.add.rectangle(lx, pad.y + 1, 2, 2, PAL.yellow).setOrigin(0));
     }
 
+    // People: waving sprites, feet on the roof.
     this.personRects = new Map();
     for (const p of this.world.people) {
-      this.personRects.set(p.id, this.add.rectangle(p.x, p.y, PERSON_W, PERSON_H, PAL.yellow).setOrigin(0));
+      this.personRects.set(p.id, this.add.sprite(p.x, p.roofY - 7, 'person', p.id % 2).setOrigin(0));
     }
   }
 
   createHeli() {
-    // Grey-box helicopter, 16x10, facing right.
-    const c = this.add.container(0, 0).setDepth(10);
-    this.rotor = this.add.rectangle(1, 0, 15, 1, PAL.darkGrey).setOrigin(0);
-    c.add([
-      this.rotor,
-      this.add.rectangle(7, 1, 2, 2, PAL.darkGrey).setOrigin(0), // mast
-      ...(this.heliRed = [
-        this.add.rectangle(4, 3, 12, 6, PAL.red).setOrigin(0), // body
-        this.add.rectangle(0, 4, 4, 2, PAL.red).setOrigin(0), // tail
-        this.add.rectangle(0, 2, 1, 3, PAL.red).setOrigin(0), // tail fin
-      ]),
-      this.add.rectangle(12, 4, 3, 2, PAL.white).setOrigin(0), // window
-      this.add.rectangle(5, 9, 10, 1, PAL.darkGrey).setOrigin(0), // skid
-    ]);
-    this.heliGfx = c;
+    // Pixel-art helicopter (picked on the picks page), 16x10, two rotor frames.
+    this.heliGfx = this.add.sprite(0, 0, 'heli', 0).setOrigin(0).setDepth(10);
     // Hover gauge (only in hover-limit mode 2): thin bar above the helicopter.
     this.gaugeBg = this.add.rectangle(0, 0, 14, 2, PAL.black).setOrigin(0).setDepth(12).setVisible(false);
     this.gaugeFill = this.add.rectangle(0, 0, 14, 2, PAL.cyan).setOrigin(0).setDepth(13).setVisible(false);
-    this.rotorTick = 0;
   }
 
   createHud() {
@@ -156,6 +140,8 @@ export default class GameScene extends Phaser.Scene {
       store,
       onResume: () => this.resumeGame(),
       onRestart: () => this.restartRun(),
+      onButton: () => sound.play('click'),
+      onToggle: () => sound.applySettings(),
       depth: PAUSE_DEPTH,
     });
   }
@@ -168,6 +154,7 @@ export default class GameScene extends Phaser.Scene {
 
   pauseGame() {
     if (!this.canPause()) return;
+    sound.play('click');
     this.paused = true;
     this.time.paused = true;
     this.tweens.pauseAll();
@@ -248,6 +235,7 @@ export default class GameScene extends Phaser.Scene {
     if (this.state === 'flying') {
       // Immediate impulse: the very next frame already moves up.
       press(this.heli, tuning);
+      sound.play('tap');
     } else if (this.state === 'tally' && this.time.now >= this.tapOkAt) {
       this.nextLevel();
     } else if (this.state === 'gameover' && this.time.now >= this.tapOkAt) {
@@ -291,7 +279,13 @@ export default class GameScene extends Phaser.Scene {
   countdown() {
     const steps = [
       [0, () => this.message('READY!', TEXT.message, 16)],
-      [900, () => this.message('3', TEXT.number, 24)],
+      [
+        900,
+        () => {
+          this.message('3', TEXT.number, 24);
+          sound.play('countdown'); // beeps on 3, 2, 1 and GO! (one sound, 0.5 s apart)
+        },
+      ],
       [1400, () => this.message('2', TEXT.number, 24)],
       [1900, () => this.message('1', TEXT.number, 24)],
       [
@@ -328,6 +322,7 @@ export default class GameScene extends Phaser.Scene {
   crash() {
     this.state = 'crashed';
     this.endAttempt('crash');
+    sound.play('crash');
     release(this.heli);
     this.heliGfx.setVisible(false);
     this.spawnDebris();
@@ -405,6 +400,7 @@ export default class GameScene extends Phaser.Scene {
 
   touchdown() {
     this.state = 'touchdown';
+    sound.play('landing');
     // People pop out next to the helicopter, one by one.
     const n = this.rescued.size;
     for (let i = 0; i < n; i++) {
@@ -412,7 +408,7 @@ export default class GameScene extends Phaser.Scene {
         const side = i % 2 === 0 ? 1 : -1;
         const step = Math.floor(i / 2) + 1;
         const x = this.heli.x + (side > 0 ? HELI_W + 2 + (step - 1) * 6 : -2 - PERSON_W - (step - 1) * 6);
-        this.add.rectangle(x, this.world.pad.y - PERSON_H, PERSON_W, PERSON_H, PAL.yellow).setOrigin(0);
+        this.add.sprite(x, this.world.pad.y - 7, 'person', 1).setOrigin(0);
       });
     }
     this.time.delayedCall(250 + n * 120, () => this.showTally());
@@ -426,6 +422,7 @@ export default class GameScene extends Phaser.Scene {
     const rescuePts = n * POINTS_PERSON; // already added at pickup
     const bonus = perfect ? rescuePts : 0; // all saved -> rescue points doubled
     this.run.score += bonus + POINTS_HELIPAD;
+    this.time.delayedCall(150, () => sound.play('levelClear'));
     store.submitScore(this.run.score);
     this.updateHud();
 
@@ -502,6 +499,7 @@ export default class GameScene extends Phaser.Scene {
 
   pickup(p) {
     this.rescued.add(p.id);
+    sound.play('pickup');
     this.personRects.get(p.id).setVisible(false);
     this.run.score += POINTS_PERSON;
     this.updateHud();
@@ -538,10 +536,13 @@ export default class GameScene extends Phaser.Scene {
   renderHeli() {
     const h = this.heli;
     this.heliGfx.setPosition(Math.round(h.x), Math.round(h.y));
-    // Rotor flicker.
-    this.rotorTick = (this.rotorTick + 1) % 6;
-    if (this.rotorTick < 3) this.rotor.setPosition(1, 0).setSize(15, 1);
-    else this.rotor.setPosition(4, 0).setSize(9, 1);
+    // Rotor: switch frames every 60 ms. People wave, helipad lights blink.
+    const now = this.time.now;
+    this.heliGfx.setFrame(Math.floor(now / 60) % 2);
+    const wave = Math.floor(now / 350) % 2;
+    this.personRects.forEach((spr, id) => spr.setFrame((wave + id) % 2));
+    const lightsOn = Math.floor(now / 500) % 2 === 0;
+    this.padLights.forEach((l) => l.setVisible(lightsOn));
 
     // Hover gauge display (hover-limit mode 2), see tuning 'gaugeDisplay':
     //   0 = small meter in the HUD + helicopter flashes when almost empty
@@ -551,7 +552,8 @@ export default class GameScene extends Phaser.Scene {
     this.hud.showMeter(gaugeMode && tuning.gaugeDisplay === 0);
     if (gaugeMode) this.hud.setMeter(h.gauge, low);
     const flash = low && tuning.gaugeDisplay !== 2 && Math.floor(this.time.now / 100) % 2 === 0;
-    this.heliRed.forEach((r) => r.setFillStyle(flash ? PAL.white : PAL.red));
+    if (flash) this.heliGfx.setTintFill(PAL.white);
+    else this.heliGfx.clearTint();
     const showGauge = gaugeMode && tuning.gaugeDisplay === 2 && this.heliGfx.visible && h.gauge < 1;
     this.gaugeBg.setVisible(showGauge).setPosition(Math.round(h.x) + 1, Math.round(h.y) - 4);
     const fw = Math.round(14 * h.gauge);
@@ -564,5 +566,9 @@ export default class GameScene extends Phaser.Scene {
     const maxScroll = this.world.length - GAME_W;
     const sx = Phaser.Math.Clamp(Math.round(h.x - HELI_SCREEN_X), 0, maxScroll);
     this.cameras.main.setScroll(sx, 0);
+
+    // Parallax background (whole pixels only).
+    this.skylineImg.setX(-(Math.round(sx * 0.3) % BG_REPEAT));
+    this.cloudsImg.setX(-(Math.round(sx * 0.1 + now * 0.004) % BG_REPEAT));
   }
 }

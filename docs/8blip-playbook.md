@@ -1,6 +1,6 @@
 # 8Blip Playbook — how we make every game
 
-**Version:** 1.1 · 2026-11-24
+**Version:** 1.2 · 2026-11-26
 **Applies to:** every 8Blip Arcade game (Rotor Rescue first, then the shoot 'em up and the rescue run)
 **Based on:** standard indie game development practice: greybox prototyping, vertical slice, Nintendo's 4-step level design, "juice" for game feel, structured playtesting, scope freeze, soft launch, post-launch content and a postmortem.
 
@@ -47,6 +47,37 @@ A shared box of building blocks on top of Phaser, reused by every 8Blip game. **
 - An improvement to the kit, such as a better pause menu, can be brought into every game
 
 **Why:** game #2 gets finished much faster than game #1, and all 8Blip games feel like they come from the same studio.
+
+## How we work day to day — "Claude makes, Jozo picks" (DECIDED, Jozo 2026-11-26)
+Jozo: "I love this way of working and how I can pick and choose." Keep this for every game.
+
+**The loop**
+1. Claude builds something playable or listenable and puts it online (every push to `main` is live in about a minute)
+2. Jozo (and the kids) try it on the phone
+3. Jozo copies the result with a button and pastes it back to Claude in the chat
+4. Claude turns it into the new default, and the next step starts
+
+**The test links (every game has them, from the 8Blip Kit)**
+| Link | What it's for | What Jozo sends back |
+|---|---|---|
+| Play link | Just play | Plain words: "drops too fast", "kids loved it" |
+| `?tune=1` | Sliders for the feel (gravity, lift, speed, hitbox…), change while playing, Restart button, build number at the top | **Copy values** |
+| `?stats=1` | Playtest stats stored on the device: attempts, crashes, where crashes happen | **Copy stats** |
+| `preview.html` | The picks page: 2–3 versions of every art piece, sound and music track, side by side, with a live scene | **Copy my picks** + notes |
+
+**Picking rules**
+- Always **2–3 versions** to choose from, never just one
+- Every version is **kept** (on the picks page and in the project history), so we can always go back. Drafts are numbered ("Draft 3 — Sunny")
+- If nothing fits ("crash: none, more explosive"), Claude makes new versions; the old ones stay
+- The kids pick most of the look and sound; Jozo decides the feel and the difficulty
+- Picks are saved on the phone, so choosing can happen over several sittings
+
+**Things learned (Rotor Rescue, milestones 1–2)**
+- Defaults vs phone settings: sliders moved on a phone are saved on that phone and win over new defaults. After Claude changes defaults, tap **Reset to defaults** in `?tune=1`
+- A new version can take a few minutes to show up on a phone (browser cache). Close the tab and reopen; the build number in `?tune=1` shows which version is running
+- On iPhone, sound needs the silent switch off and starts only after the first tap (browser rule)
+- Claude tests every change in an emulated iPhone before pushing, including several rounds in a row (land twice, restart, game over twice), pause in every screen, and the dev panels open. Bugs found by Jozo become part of that routine
+- Plain words work best for feedback: "more of an exploding sound, bigger impact" is perfect
 
 ## Level design: Nintendo's 4 steps
 Every level, or every new obstacle, follows four steps:
@@ -123,3 +154,4 @@ This table replaces the "Build order" list in the design doc (§13) where they d
 |---|---|---|
 | 1.0 | 2026-11-23 | First playbook, after Jozo asked whether our process matches known game development practice. Added vertical slice gate, 4-step level design, playtest routine, scope freeze, juice round, soft launch, launch checklist and postmortem. |
 | 1.1 | 2026-11-24 | Added the 8Blip Kit (phase 12): shared building blocks on top of Phaser, reused by every game. Decided to stay with Phaser rather than write an own engine. |
+| 1.2 | 2026-11-26 | Added "How we work day to day": the Claude-makes / Jozo-picks loop, the four test links (play, `?tune=1`, `?stats=1`, `preview.html`) with their copy buttons, picking rules, and lessons from Rotor Rescue milestones 1–2. |

@@ -10,6 +10,7 @@
 - Small playable steps; after every change the game must still load and run without console errors
 - Fun, feel, look and difficulty are judged by Jozo and his kids: ask, don't assume
 - Plain language when explaining things to Jozo; he doesn't code
+- Work the "Claude makes, Jozo picks" way (see `docs/8blip-playbook.md`, "How we work day to day"): always 2–3 versions, keep every version, use the copy buttons (`?tune=1`, `?stats=1`, `preview.html`) for feedback, and record new lessons in the playbook
 
 ## Code layout
 

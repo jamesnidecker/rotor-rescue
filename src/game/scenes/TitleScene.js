@@ -3,6 +3,7 @@ import { PAL, TEXT } from '../../kit/palette.js';
 import { centerText, score6, blink } from '../../kit/text.js';
 import { GAME_H } from '../config.js';
 import { store } from '../store.js';
+import { sound } from '../sound.js';
 
 export default class TitleScene extends Phaser.Scene {
   constructor() {
@@ -28,8 +29,21 @@ export default class TitleScene extends Phaser.Scene {
 
     centerText(this, GAME_H - 24, '8BLIP ARCADE', PAL.midGrey);
 
-    const start = () => this.scene.start('game', { fresh: true });
-    this.input.once('pointerdown', start);
-    this.input.keyboard?.once('keydown-SPACE', start);
+    // Title theme. Browsers only allow sound after a tap, so on the very first
+    // visit the first tap starts the music and the next tap starts the game.
+    // (Later visits: music plays right away and one tap starts the game.)
+    sound.music('title');
+    let waitingForMusic = !sound.unlocked && store.getSettings().music;
+    const start = () => {
+      if (waitingForMusic) {
+        waitingForMusic = false; // this tap unlocked the sound; the theme starts now
+        return;
+      }
+      sound.play('click');
+      sound.stopMusic();
+      this.scene.start('game', { fresh: true });
+    };
+    this.input.on('pointerdown', start);
+    this.input.keyboard?.on('keydown-SPACE', start);
   }
 }

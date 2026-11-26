@@ -1,6 +1,6 @@
 # Rotor Rescue — Game Design
 
-**Version:** 0.10 · 2026-11-24
+**Version:** 0.11 · 2026-11-26
 **Studio:** 8Blip Arcade
 **App Store title:** Rotor Rescue · **Subtitle (proposal):** 8-bit Heli Rescue Arcade
 **Replaces:** the dodge game as game #1 (the dodge game moves to "later")
@@ -198,7 +198,7 @@ Each update: new location(s), one new obstacle type, one new music track, new se
 - Per-level background and obstacle list for levels 1–11 (proposal in §6)
 - Exact point values, extra-life threshold and loop speed (tune in testing)
 - Difficulty targets in §7 (proposal; confirm after the first playtests)
-- Helicopter look and sprites
+- ~~Helicopter look and sprites~~ → DECIDED 2026-11-26: **B "Bubble"** (picked by Jozo's kids on the picks page)
 - Leaderboard tech setup (Claude proposes before the polish milestone)
 
 ## Changelog
@@ -213,4 +213,5 @@ Each update: new location(s), one new obstacle type, one new music track, new se
 | 0.7 | 2026-11-23 | Locked: 10 levels per update, cap 42. Level 12 is a neon futuristic city finale. |
 | 0.8 | 2026-11-23 | Name locked: Rotor Rescue. Build brief for milestone 1 written. |
 | 0.9 | 2026-11-23 | Locked: portrait, iPad arcade cabinet frame. Added difficulty target with measurable playtest targets, sawtooth curve and a local-only playtest stats screen. Copied into the repo's `docs/` folder on 2026-11-24; build order now lives in the playbook. |
+| 0.11 | 2026-11-26 | Milestone 2 picks by Jozo's kids (picks page `preview.html`): helicopter B "Bubble", plain sky, puffy clouds, title theme Draft 3 "Sunny"; sounds: tap Blip, rescue Happy arpeggio, countdown Classic beeps, landing Touchdown, level complete Bouncy, menu Blip. Crash: none of round 1 — "more of an exploding sound, bigger impact" → round 2 (D/E/F) made. |
 | 0.10 | 2026-11-24 | Added limited hover as a test item (Jozo's idea): fixed hover time per hold or a hover gauge, both tunable, compared against unlimited hover in the first playtest. Same intent as the original double-tap idea, without the input delay. |

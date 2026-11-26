@@ -69,6 +69,42 @@ export const SFX = {
         { wave: 'triangle', f0: 90, f1: 30, dur: 0.6, vol: 0.7 },
       ],
     },
+    // Round 2 (Jozo: "more of an exploding sound, bigger impact")
+    D: {
+      name: 'Big boom',
+      v: [
+        { wave: 'noise', filter: 5000, filter1: 80, dur: 1.2, vol: 0.95, hold: 0.15 },
+        { t: 0.08, wave: 'noise', filter: 2500, filter1: 80, dur: 0.9, vol: 0.7 },
+        { wave: 'triangle', f0: 160, f1: 30, dur: 0.8, vol: 0.9 },
+        { wave: 'square', f0: 200, f1: 40, dur: 0.5, vol: 0.25 },
+      ],
+    },
+    E: {
+      name: 'Explosion + debris',
+      v: [
+        { wave: 'noise', filter: 8000, filter1: 300, dur: 0.25, vol: 0.95 },
+        { t: 0.05, wave: 'noise', filter: 1200, filter1: 60, dur: 1.4, vol: 0.85, hold: 0.2 },
+        { wave: 'triangle', f0: 110, f1: 28, dur: 1.0, vol: 0.9 },
+        { t: 0.3, wave: 'noise', filter: 6000, highpass: true, dur: 0.06, vol: 0.25 },
+        { t: 0.45, wave: 'noise', filter: 6000, highpass: true, dur: 0.05, vol: 0.2 },
+        { t: 0.62, wave: 'noise', filter: 6000, highpass: true, dur: 0.05, vol: 0.15 },
+      ],
+    },
+    F: {
+      name: 'Arcade blast',
+      v: [
+        {
+          wave: 'square',
+          f0: 600,
+          dur: 0.42,
+          vol: 0.25,
+          hold: 0.8,
+          steps: [[0.06, 400], [0.12, 300], [0.18, 200], [0.24, 150], [0.3, 100], [0.36, 70]],
+        },
+        { wave: 'noise', filter: 3000, filter1: 100, dur: 1.1, vol: 0.9, hold: 0.1 },
+        { wave: 'triangle', f0: 80, f1: 30, dur: 0.7, vol: 0.9 },
+      ],
+    },
   },
   countdown: {
     label: 'READY! 3 2 1 GO!',
