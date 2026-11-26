@@ -11,7 +11,7 @@ export const CHOICES = {
   sfx: {
     tap: 'A', // Blip
     pickup: 'B', // Happy arpeggio
-    crash: 'G', // Mega explosion — Claude's pick until the kids choose (round 3)
+    crash: 'G', // Mega explosion (kids' pick, round 3)
     countdown: 'A', // Classic beeps
     landing: 'B', // Touchdown
     levelClear: 'B', // Bouncy
