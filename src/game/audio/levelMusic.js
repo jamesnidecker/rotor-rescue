@@ -112,3 +112,11 @@ const DRAFT_3 = buildSong({
 });
 
 export const LEVEL_THEMES = [DRAFT_1, DRAFT_2, DRAFT_3];
+
+// Tracks by name, for the level files (level.music).
+// Decided (Jozo, 2026-11-26): Sky Patrol for level 1, Happy Heli for level 2.
+export const LEVEL_TRACKS = {
+  skyPatrol: DRAFT_1,
+  rooftopRun: DRAFT_2,
+  happyHeli: DRAFT_3,
+};

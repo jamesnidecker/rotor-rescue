@@ -2,14 +2,13 @@
 // Change a letter here to switch to another version.
 import { SFX } from './audio/sfx.js';
 import { TITLE_THEMES } from './audio/titleTheme.js';
-import { LEVEL_THEMES } from './audio/levelMusic.js';
 
 export const CHOICES = {
   heli: 'B', // Bubble
   sky: 'C', // Plain
   clouds: 'A', // Puffy
   theme: 3, // Draft 3 — Sunny
-  levelMusic: 1, // Draft 1 — Sky Patrol (Claude's pick until the kids choose)
+  // Music while flying is set per level, in each level file (level.music).
   sfx: {
     tap: 'A', // Blip
     pickup: 'B', // Happy arpeggio
@@ -23,4 +22,3 @@ export const CHOICES = {
 
 export const CHOSEN_SFX = Object.fromEntries(Object.entries(CHOICES.sfx).map(([k, v]) => [k, SFX[k][v].v]));
 export const CHOSEN_THEME = TITLE_THEMES[CHOICES.theme - 1];
-export const CHOSEN_LEVEL_MUSIC = LEVEL_THEMES[CHOICES.levelMusic - 1];

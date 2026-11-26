@@ -48,6 +48,7 @@ export default class GameScene extends Phaser.Scene {
     this.cameras.main.setRoundPixels(true);
 
     this.world = buildWorld(getLevel(this.run.level));
+    this.levelMusic = getLevel(this.run.level).music || 'skyPatrol';
     this.drawWorld();
     this.createHeli();
     this.createHud();
@@ -174,7 +175,7 @@ export default class GameScene extends Phaser.Scene {
     this.tweens.resumeAll();
     this.menu.hide();
     // Hover in place until the next touch, so resuming is never a surprise drop.
-    if (this.state === 'flying' && this.musicWasOn) sound.music('level');
+    if (this.state === 'flying' && this.musicWasOn) sound.music(this.levelMusic);
     if (this.state === 'flying') {
       this.heli.vy = 0;
       this.heli.waitingForFirstTouch = true;
@@ -298,7 +299,7 @@ export default class GameScene extends Phaser.Scene {
         () => {
           this.message('GO!', PAL.green, 24);
           this.state = 'flying';
-          sound.music('level'); // in-level music starts at GO!
+          sound.music(this.levelMusic); // in-level music starts at GO!
           this.acc = 0;
           // A finger that is already down when GO! appears counts as holding.
           if (this.fingers.size || this.spaceDown) {

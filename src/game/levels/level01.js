@@ -12,6 +12,9 @@ export default {
   id: 1,
   name: 'CITY MORNING',
   start: { x: 40, y: 150 },
+  // Music while flying: name of an in-level track (src/game/audio/levelMusic.js).
+  // Level 1 = Sky Patrol; Happy Heli is reserved for level 2 (Jozo, 2026-11-26).
+  music: 'skyPatrol',
   length: 2800,
 
   buildings: [
