@@ -90,3 +90,30 @@ export function seeded(seed) {
     return ((s >>> 0) % 10000) / 10000;
   };
 }
+
+// Smooth 80s-style vertical gradient between two palette colours, using a 4x4
+// ordered dither (17 steps), so there are no visible stripes.
+const BAYER4 = [
+  [0, 8, 2, 10],
+  [12, 4, 14, 6],
+  [3, 11, 1, 9],
+  [15, 7, 13, 5],
+];
+export function ditherGradient(ctx, x, y, w, h, colTop, colBottom) {
+  for (let py = 0; py < h; py++) {
+    const level = Math.round((16 * py) / Math.max(1, h - 1)); // 0 = top colour, 16 = bottom colour
+    for (let px = 0; px < w; px++) {
+      const useBottom = BAYER4[(y + py) & 3][(x + px) & 3] < level;
+      ctx.fillStyle = useBottom ? colBottom : colTop;
+      ctx.fillRect(x + px, y + py, 1, 1);
+    }
+  }
+}
+
+// Filled pixel circle (for round shapes like clouds).
+export function pixelCircle(ctx, cx, cy, r) {
+  for (let dy = -r; dy <= r; dy++) {
+    const half = Math.floor(Math.sqrt(r * r - dy * dy) + 0.3);
+    ctx.fillRect(cx - half, cy + dy, half * 2 + 1, 1);
+  }
+}

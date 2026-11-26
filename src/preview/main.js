@@ -9,15 +9,15 @@ import { createStore } from '../kit/storage.js';
 import { copyText } from '../kit/dev/clipboard.js';
 import { HELICOPTERS } from '../game/art/helicopters.js';
 import { PERSON_FRAMES } from '../game/art/people.js';
-import { drawBuilding, drawSky, drawCloud, drawSkyline } from '../game/art/city.js';
+import { drawBuilding, drawSky, drawCloud, drawClouds, drawSkyline, SKIES, CLOUDS } from '../game/art/city.js';
 import { SFX } from '../game/audio/sfx.js';
-import { TITLE_THEME } from '../game/audio/titleTheme.js';
+import { TITLE_THEMES } from '../game/audio/titleTheme.js';
 import { buildWorld } from '../game/world.js';
 import { getLevel } from '../game/levels/index.js';
 import { GAME_W, GAME_H, GROUND_Y, HUD_H } from '../game/config.js';
 
 const store = createStore('rotor-rescue.');
-const picks = { heli: 'A', ...store.load('picks.v1', {}) };
+const picks = { heli: 'A', sky: 'A', clouds: 'A', ...store.load('picks.v1', {}) };
 const savePicks = () => store.save('picks.v1', picks);
 const synth = createSynth({ volume: 0.35 });
 const music = createMusicPlayer(synth);
@@ -69,16 +69,18 @@ const strip = el('canvas', { width: world.length + GAME_W, height: GAME_H });
 }
 // Background layers: sky (fixed), far skyline (slow), clouds (slower still).
 const sky = el('canvas', { width: GAME_W, height: GAME_H });
-drawSky(sky.getContext('2d'), GAME_W, HUD_H, GROUND_Y);
 const skyline = el('canvas', { width: 900, height: GAME_H });
 drawSkyline(skyline.getContext('2d'), 900, GROUND_Y, 7);
 const clouds = el('canvas', { width: 900, height: 140 });
-{
-  const g = clouds.getContext('2d');
-  [[20, 40, 40], [150, 70, 28], [300, 30, 52], [470, 85, 34], [640, 50, 44], [800, 75, 30]].forEach(([x, y, w], i) =>
-    drawCloud(g, x, y, w, i + 11)
-  );
+function redrawBackground() {
+  const sg = sky.getContext('2d');
+  sg.clearRect(0, 0, GAME_W, GAME_H);
+  drawSky(sg, GAME_W, HUD_H, GROUND_Y, picks.sky);
+  const cg = clouds.getContext('2d');
+  cg.clearRect(0, 0, 900, 140);
+  drawClouds(cg, picks.clouds);
 }
+redrawBackground();
 void peopleRoofs;
 
 function safeHeight(x) {
@@ -144,6 +146,7 @@ for (const [key, h] of Object.entries(HELICOPTERS)) {
     refresh();
   });
   card.dataset.key = key;
+  card.dataset.group = 'heli';
   heliRow.append(card);
   heliCanvases.push([c, h]);
 }
@@ -157,8 +160,30 @@ for (const [key, h] of Object.entries(HELICOPTERS)) {
   requestAnimationFrame(animateHelis);
 })(0);
 
+// ---------------------------------------------------------------- sky & clouds
+function pickRow(title, note, options, key) {
+  app.append(el('h2', {}, title), el('p', { className: 'note' }, note));
+  const row = el('div', { className: 'row' });
+  for (const [k, o] of Object.entries(options)) {
+    const card = el('div', { className: 'card' }, el('div', {}, el('b', {}, `${k}: ${o.name}`)), el('div', { className: 'sub' }, o.note));
+    card.dataset.group = key;
+    card.dataset.key = k;
+    card.addEventListener('click', () => {
+      picks[key] = k;
+      savePicks();
+      redrawBackground();
+      refresh();
+      scene.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    });
+    row.append(card);
+  }
+  app.append(row);
+}
+pickRow('3. Sky', 'Tap one: the live scene at the top changes to show it.', SKIES, 'sky');
+pickRow('4. Clouds', 'Tap one: the live scene at the top changes to show it.', CLOUDS, 'clouds');
+
 // ---------------------------------------------------------------- people & city
-app.append(el('h2', {}, '3. People and buildings'));
+app.append(el('h2', {}, '5. People and buildings'));
 app.append(el('p', { className: 'note' }, 'People wave until you pick them up. Buildings get windows, a light and a shadow side and rooftop details (water tanks, antennas, air conditioning). The background (skyline, clouds) is kept soft so it never looks like something you can crash into.'));
 const close = el('canvas', { width: 180, height: 110 });
 close.style.width = '360px';
@@ -177,7 +202,7 @@ app.append(close);
 })(0);
 
 // ---------------------------------------------------------------- sounds
-app.append(el('h2', {}, '4. Sound effects'));
+app.append(el('h2', {}, '6. Sound effects'));
 app.append(el('p', { className: 'note' }, 'Tap ▶ to listen, then tap the one you like best.'));
 const soundButtons = [];
 for (const [key, s] of Object.entries(SFX)) {
@@ -202,26 +227,28 @@ for (const [key, s] of Object.entries(SFX)) {
 }
 
 // ---------------------------------------------------------------- music
-app.append(el('h2', {}, '5. Title theme'));
-app.append(el('p', { className: 'note' }, 'First draft of the title music (about 27 seconds, it loops). Does it sound like an 80s arcade game? Is it catchy?'));
-const playBtn = el('button', { className: 'play' }, '▶ Play title theme');
-const stopBtn = el('button', {}, '■ Stop');
-playBtn.addEventListener('click', () => music.play(TITLE_THEME));
-stopBtn.addEventListener('click', () => music.stop());
-const likeBtns = ['Love it', 'OK, keep going', 'Try something else'].map((label) => {
-  const b = el('button', {}, label);
-  b.dataset.theme = label;
-  b.addEventListener('click', () => {
-    picks.theme = label;
+app.append(el('h2', {}, '7. Title theme'));
+app.append(el('p', { className: 'note' }, 'Three drafts, each about 25-30 seconds and looping. All drafts are kept, so you can always come back to one. Tap the one you like best.'));
+const themeBtns = [];
+TITLE_THEMES.forEach((song, i) => {
+  const play = el('button', { className: 'play' }, `▶ ${song.name}`);
+  play.addEventListener('click', () => music.play(song));
+  const pick = el('button', {}, 'Favourite');
+  pick.dataset.theme = String(i + 1);
+  pick.addEventListener('click', () => {
+    picks.theme = String(i + 1);
     savePicks();
     refresh();
   });
-  return b;
+  themeBtns.push(pick);
+  app.append(el('div', { className: 'sound' }, play, pick));
 });
-app.append(el('div', {}, playBtn, stopBtn), el('div', {}, ...likeBtns));
+const stopBtn = el('button', {}, '■ Stop music');
+stopBtn.addEventListener('click', () => music.stop());
+app.append(el('div', {}, stopBtn));
 
 // ---------------------------------------------------------------- notes + copy
-app.append(el('h2', {}, '6. Anything else?'));
+app.append(el('h2', {}, '8. Anything else?'));
 const notes = el('textarea', { placeholder: 'e.g. "helicopter more red", "kids loved the crash sound", "clouds too busy"', value: picks.notes || '' });
 notes.addEventListener('input', () => {
   picks.notes = notes.value;
@@ -236,7 +263,9 @@ copyBtn.addEventListener('click', async () => {
     'ROTOR RESCUE PICKS',
     `helicopter: ${picks.heli} (${HELICOPTERS[picks.heli].name})`,
     ...Object.entries(SFX).map(([k, s]) => `${k}: ${picks[k] ? `${picks[k]} (${s[picks[k]].name})` : '-'}`),
-    `title theme: ${picks.theme || '-'}`,
+    `sky: ${picks.sky} (${SKIES[picks.sky].name})`,
+    `clouds: ${picks.clouds} (${CLOUDS[picks.clouds].name})`,
+    `title theme: ${picks.theme ? TITLE_THEMES[Number(picks.theme) - 1]?.name ?? picks.theme : '-'}`,
     `notes: ${picks.notes || '-'}`,
   ];
   status.textContent = (await copyText(lines.join('\n'))) ? 'Copied! Paste it to Claude.' : 'Copy failed';
@@ -244,8 +273,8 @@ copyBtn.addEventListener('click', async () => {
 app.append(el('div', { className: 'actions' }, copyBtn, status));
 
 function refresh() {
-  heliRow.querySelectorAll('.card').forEach((c) => c.classList.toggle('picked', c.dataset.key === picks.heli));
+  document.querySelectorAll('.card').forEach((c) => c.classList.toggle('picked', picks[c.dataset.group] === c.dataset.key));
   soundButtons.forEach((b) => b.classList.toggle('picked', picks[b.dataset.sound] === b.dataset.key));
-  likeBtns.forEach((b) => b.classList.toggle('picked', picks.theme === b.dataset.theme));
+  themeBtns.forEach((b) => b.classList.toggle('picked', picks.theme === b.dataset.theme));
 }
 refresh();

@@ -1,5 +1,5 @@
 import { HEX } from '../../kit/palette.js';
-import { ditherRect, seeded } from '../../kit/pixels.js';
+import { ditherRect, ditherGradient, pixelCircle, seeded } from '../../kit/pixels.js';
 
 // City art for level 1 ("city, morning"), drawn in code.
 // Rule: everything you can crash into is clear and strong; the background is
@@ -64,37 +64,112 @@ export function drawBuilding(ctx, x, y, w, h, shadeIndex = 0, seed = 1) {
   }
 }
 
-// Morning sky, top to bottom: royal blue fading into sky blue. Dithered bands
-// instead of a smooth gradient (style guide). Plain sky blue lower down, so the
-// area where you fly stays calm.
-export function drawSky(ctx, w, top, bottom) {
-  const h = bottom - top;
-  const band = (i, a, b, level) => {
-    const y0 = top + Math.round((h * i) / 10);
-    const y1 = top + Math.round((h * (i + 1)) / 10);
-    ditherRect(ctx, 0, y0, w, y1 - y0, a, b, level);
-  };
-  band(0, HEX.royalBlue, HEX.skyBlue, 2);
-  band(1, HEX.royalBlue, HEX.skyBlue, 3);
-  for (let i = 2; i < 10; i++) band(i, HEX.skyBlue, HEX.skyBlue, 0);
+// Morning sky versions to pick from. All keep the lower sky (where you fly)
+// plain and calm.
+export const SKIES = {
+  A: {
+    name: 'Smooth fade',
+    note: 'Royal blue at the top fading into sky blue, with a fine dither (no stripes)',
+    draw(ctx, w, top, bottom) {
+      const h = bottom - top;
+      ctx.fillStyle = HEX.skyBlue;
+      ctx.fillRect(0, top, w, h);
+      ditherGradient(ctx, 0, top, w, Math.round(h * 0.45), HEX.royalBlue, HEX.skyBlue);
+    },
+  },
+  B: {
+    name: 'Retro lines',
+    note: 'Classic 80s: royal blue lines that get thinner and further apart',
+    draw(ctx, w, top, bottom) {
+      const h = bottom - top;
+      ctx.fillStyle = HEX.royalBlue;
+      ctx.fillRect(0, top, w, Math.round(h * 0.08));
+      ctx.fillStyle = HEX.skyBlue;
+      let y = top + Math.round(h * 0.08);
+      ctx.fillRect(0, y, w, bottom - y);
+      // alternating bands: blue line, then a growing gap
+      let line = 5;
+      let gap = 2;
+      ctx.fillStyle = HEX.royalBlue;
+      while (line > 0 && y < top + h * 0.5) {
+        y += gap;
+        ctx.fillRect(0, y, w, line);
+        y += line;
+        line -= 1;
+        gap += 3;
+      }
+    },
+  },
+  C: {
+    name: 'Plain',
+    note: 'Just sky blue: the calmest, most classic look',
+    draw(ctx, w, top, bottom) {
+      ctx.fillStyle = HEX.skyBlue;
+      ctx.fillRect(0, top, w, bottom - top);
+    },
+  },
+};
+
+export function drawSky(ctx, w, top, bottom, key = 'A') {
+  (SKIES[key] || SKIES.A).draw(ctx, w, top, bottom);
 }
 
-// A puffy pixel cloud, roughly w x h.
-export function drawCloud(ctx, x, y, w, seed = 1) {
-  const rnd = seeded(seed);
-  const h = Math.max(6, Math.round(w / 3));
-  ctx.fillStyle = HEX.white;
-  ctx.fillRect(x, y + h - 4, w, 4); // flat base
-  const puffs = 2 + Math.floor(rnd() * 3);
-  for (let i = 0; i < puffs; i++) {
-    const pw = Math.round(w * (0.3 + rnd() * 0.3));
-    const px = x + Math.round(rnd() * (w - pw));
-    const ph = Math.round(h * (0.5 + rnd() * 0.5));
-    ctx.fillRect(px, y + h - ph, pw, ph);
-    ctx.fillRect(px + 1, y + h - ph - 1, pw - 2, 1);
+// Cloud versions to pick from. Each draws one cloud of about width w.
+function puffy(ctx, x, y, w, rnd) {
+  const r = Math.max(3, Math.round(w / 6));
+  const n = Math.max(3, Math.round(w / (r * 1.4)));
+  const centers = [];
+  for (let i = 0; i < n; i++) {
+    const cx = x + r + Math.round(((w - 2 * r) * i) / (n - 1));
+    const lift = i === 0 || i === n - 1 ? 0 : Math.round(r * (0.4 + rnd() * 0.6));
+    const rr = i === 0 || i === n - 1 ? r - 1 : r + Math.round(rnd() * 2);
+    centers.push([cx, y + r * 2 - lift, rr]);
   }
-  ctx.fillStyle = HEX.lightGrey; // soft underside
-  ctx.fillRect(x + 1, y + h - 1, w - 2, 1);
+  ctx.fillStyle = HEX.lightGrey; // soft grey underside, 1 px lower
+  for (const [cx, cy, rr] of centers) pixelCircle(ctx, cx, cy + 1, rr);
+  ctx.fillRect(x + r, y + r * 2 + 1, w - 2 * r, r);
+  ctx.fillStyle = HEX.white;
+  for (const [cx, cy, rr] of centers) pixelCircle(ctx, cx, cy, rr);
+  ctx.fillRect(x + r, y + r * 2, w - 2 * r, r);
+}
+
+export const CLOUDS = {
+  A: {
+    name: 'Puffy',
+    note: 'Round, soft clouds with a light grey underside',
+    layout: [[10, 30, 44], [150, 62, 30], [300, 22, 56], [470, 78, 36], [640, 40, 48], [800, 70, 32]],
+    draw: puffy,
+  },
+  B: {
+    name: 'Streaks',
+    note: 'Long, thin morning clouds — very calm',
+    layout: [[0, 30, 70], [130, 58, 46], [260, 20, 90], [420, 72, 54], [560, 40, 80], [740, 64, 60]],
+    draw(ctx, x, y, w) {
+      ctx.fillStyle = HEX.lightGrey;
+      ctx.fillRect(x + 3, y + 3, w - 6, 1);
+      ctx.fillStyle = HEX.white;
+      ctx.fillRect(x + 4, y, w - 14, 1);
+      ctx.fillRect(x, y + 1, w, 2);
+      ctx.fillRect(x + 10, y - 1, Math.round(w / 3), 1);
+    },
+  },
+  C: {
+    name: 'Few and small',
+    note: 'Just a couple of small puffy clouds — least busy',
+    layout: [[60, 40, 26], [420, 66, 22], [700, 30, 28]],
+    draw: puffy,
+  },
+};
+
+// All clouds of one version into a wide strip (canvas context), repeating.
+export function drawClouds(ctx, key = 'A') {
+  const c = CLOUDS[key] || CLOUDS.A;
+  c.layout.forEach(([x, y, w], i) => c.draw(ctx, x, y, w, seeded(i + 11)));
+}
+
+// Old single cloud helper (puffy), used by the close-up.
+export function drawCloud(ctx, x, y, w, seed = 1) {
+  puffy(ctx, x, y, w, seeded(seed));
 }
 
 // Far-away skyline: soft, lightly dithered (mostly sky blue with a little royal

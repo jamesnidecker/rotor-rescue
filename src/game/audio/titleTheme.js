@@ -1,72 +1,95 @@
-// Title theme — first draft. Upbeat chiptune, 140 BPM, 16 bars (~27 s loop).
-// Lead: square. Arpeggio: thin pulse. Bass: triangle. Drums: noise + kick.
+import { buildSong } from '../../kit/audio/compose.js';
 
-const CHORDS = [
-  // A section
-  'C', 'Am', 'F', 'G', 'C', 'Am', 'F/G', 'C',
-  // B section
-  'F', 'G', 'Em', 'Am', 'F', 'G', 'C', 'G',
-];
-const TONES = { C: ['C', 'E', 'G'], Am: ['A', 'C', 'E'], F: ['F', 'A', 'C'], G: ['G', 'B', 'D'], Em: ['E', 'G', 'B'] };
+// Title theme drafts. ALL drafts stay here (an archive), so they can be
+// compared on the picks page. Each loops; 16 bars.
 
-// Melody in eighth notes (each length x2 = sixteenths).
-const MELODY_8THS = [
-  [['E5', 2], ['G5', 1], ['C6', 1], ['B5', 2], ['G5', 2]],
-  [['A5', 2], ['G5', 1], ['E5', 1], ['C5', 2], ['E5', 2]],
-  [['F5', 2], ['A5', 1], ['C6', 1], ['A5', 2], ['F5', 2]],
-  [['G5', 3], ['A5', 1], ['B5', 2], ['D6', 2]],
-  [['E6', 2], ['D6', 1], ['C6', 1], ['G5', 2], ['E5', 2]],
-  [['A5', 2], ['C6', 1], ['A5', 1], ['E5', 2], ['C5', 2]],
-  [['F5', 1], ['A5', 1], ['C6', 2], ['D6', 1], ['B5', 1], ['G5', 2]],
-  [['C6', 6], ['r', 2]],
-  [['A5', 1], ['A5', 1], ['C6', 2], ['A5', 2], ['F5', 2]],
-  [['B5', 1], ['B5', 1], ['D6', 2], ['B5', 2], ['G5', 2]],
-  [['G5', 1], ['G5', 1], ['B5', 2], ['E6', 2], ['B5', 2]],
-  [['C6', 2], ['B5', 1], ['A5', 1], ['E5', 4]],
-  [['F5', 1], ['G5', 1], ['A5', 2], ['C6', 2], ['F6', 2]],
-  [['G5', 1], ['A5', 1], ['B5', 2], ['D6', 2], ['G6', 2]],
-  [['E6', 2], ['D6', 1], ['C6', 1], ['D6', 2], ['E6', 2]],
-  [['D6', 2], ['B5', 2], ['G5', 2], ['r', 2]],
-];
-
-function chordsOfBar(bar) {
-  return CHORDS[bar].split('/');
-}
-
-function arpeggio() {
-  const notes = [];
-  CHORDS.forEach((_, bar) => {
-    const cs = chordsOfBar(bar);
-    for (let i = 0; i < 16; i++) {
-      const ch = cs[Math.floor((i * cs.length) / 16)];
-      const t = TONES[ch];
-      const seq = [t[0] + '4', t[1] + '4', t[2] + '4', t[0] + '5'];
-      notes.push([seq[i % 4], 1]);
-    }
-  });
-  return notes;
-}
-
-function bass() {
-  const notes = [];
-  CHORDS.forEach((_, bar) => {
-    const cs = chordsOfBar(bar);
-    for (let i = 0; i < 8; i++) {
-      const root = TONES[cs[Math.floor((i * cs.length) / 8)]][0];
-      notes.push([root + (i % 2 ? '3' : '2'), 2]);
-    }
-  });
-  return notes;
-}
-
-export const TITLE_THEME = {
-  name: 'Title theme (draft 1)',
+// Draft 1 — "Upbeat" (Jozo likes this one). C major, 140 BPM.
+const DRAFT_1 = buildSong({
+  name: 'Draft 1 — Upbeat',
   bpm: 140,
-  bars: 16,
-  tracks: [
-    { wave: 'square', vol: 0.16, gate: 0.85, notes: MELODY_8THS.flat().map(([x, l]) => [x, l * 2]) },
-    { wave: 'pulse12', vol: 0.06, gate: 0.7, notes: arpeggio() },
-    { wave: 'triangle', vol: 0.45, gate: 0.8, notes: bass() },
-    { drums: ['k.h.s.h.k.h.s.h.', 'k.h.s.h.k.k.s.hh'], vol: 0.8 },
+  chords: ['C', 'Am', 'F', 'G', 'C', 'Am', 'F/G', 'C', 'F', 'G', 'Em', 'Am', 'F', 'G', 'C', 'G'],
+  melody: [
+    [['E5', 2], ['G5', 1], ['C6', 1], ['B5', 2], ['G5', 2]],
+    [['A5', 2], ['G5', 1], ['E5', 1], ['C5', 2], ['E5', 2]],
+    [['F5', 2], ['A5', 1], ['C6', 1], ['A5', 2], ['F5', 2]],
+    [['G5', 3], ['A5', 1], ['B5', 2], ['D6', 2]],
+    [['E6', 2], ['D6', 1], ['C6', 1], ['G5', 2], ['E5', 2]],
+    [['A5', 2], ['C6', 1], ['A5', 1], ['E5', 2], ['C5', 2]],
+    [['F5', 1], ['A5', 1], ['C6', 2], ['D6', 1], ['B5', 1], ['G5', 2]],
+    [['C6', 6], ['r', 2]],
+    [['A5', 1], ['A5', 1], ['C6', 2], ['A5', 2], ['F5', 2]],
+    [['B5', 1], ['B5', 1], ['D6', 2], ['B5', 2], ['G5', 2]],
+    [['G5', 1], ['G5', 1], ['B5', 2], ['E6', 2], ['B5', 2]],
+    [['C6', 2], ['B5', 1], ['A5', 1], ['E5', 4]],
+    [['F5', 1], ['G5', 1], ['A5', 2], ['C6', 2], ['F6', 2]],
+    [['G5', 1], ['A5', 1], ['B5', 2], ['D6', 2], ['G6', 2]],
+    [['E6', 2], ['D6', 1], ['C6', 1], ['D6', 2], ['E6', 2]],
+    [['D6', 2], ['B5', 2], ['G5', 2], ['r', 2]],
   ],
-};
+  drums: ['k.h.s.h.k.h.s.h.', 'k.h.s.h.k.k.s.hh'],
+});
+
+// Draft 2 — "Adventure". A minor, 150 BPM, driving drums, more tension.
+const DRAFT_2 = buildSong({
+  name: 'Draft 2 — Adventure',
+  bpm: 150,
+  chords: ['Am', 'F', 'C', 'G', 'Am', 'F', 'G', 'G', 'F', 'G', 'Am', 'Am', 'F', 'G', 'E', 'E'],
+  melody: [
+    [['A5', 2], ['C6', 2], ['E6', 2], ['D6', 1], ['C6', 1]],
+    [['C6', 2], ['A5', 2], ['F5', 2], ['A5', 2]],
+    [['G5', 2], ['C6', 2], ['E6', 2], ['G6', 2]],
+    [['D6', 3], ['C6', 1], ['B5', 2], ['G5', 2]],
+    [['A5', 1], ['A5', 1], ['C6', 2], ['E6', 2], ['A6', 2]],
+    [['G6', 2], ['F6', 1], ['E6', 1], ['C6', 2], ['A5', 2]],
+    [['B5', 2], ['D6', 2], ['G6', 2], ['F6', 1], ['D6', 1]],
+    [['D6', 6], ['r', 2]],
+    [['F6', 2], ['E6', 1], ['D6', 1], ['C6', 2], ['A5', 2]],
+    [['G5', 2], ['B5', 1], ['D6', 1], ['G6', 2], ['D6', 2]],
+    [['E6', 2], ['C6', 1], ['A5', 1], ['E5', 2], ['A5', 2]],
+    [['C6', 4], ['B5', 2], ['A5', 2]],
+    [['A5', 1], ['C6', 1], ['F6', 2], ['E6', 1], ['D6', 1], ['C6', 2]],
+    [['B5', 1], ['D6', 1], ['G6', 2], ['F6', 1], ['D6', 1], ['B5', 2]],
+    [['G#5', 2], ['B5', 2], ['E6', 2], ['G#5', 2]],
+    [['B5', 4], ['r', 4]],
+  ],
+  lead: 'pulse25',
+  leadVol: 0.18,
+  arp: 'pulse12',
+  arpOctave: 4,
+  bassStyle: 'walk',
+  drums: ['k.hhs.h.k.hhs.hh', 'k.hhs.h.kkhhs.ss'],
+});
+
+// Draft 3 — "Sunny". G major, 128 BPM, bouncy with little pauses (syncopation).
+const DRAFT_3 = buildSong({
+  name: 'Draft 3 — Sunny',
+  bpm: 128,
+  chords: ['G', 'D', 'Em', 'C', 'G', 'D', 'C/D', 'G', 'Em', 'C', 'G', 'D', 'Em', 'C', 'D', 'D'],
+  melody: [
+    [['B5', 1], ['D6', 1], ['r', 1], ['B5', 1], ['G5', 2], ['A5', 2]],
+    [['F#5', 1], ['A5', 1], ['r', 1], ['D6', 1], ['A5', 2], ['F#5', 2]],
+    [['G5', 1], ['B5', 1], ['r', 1], ['E6', 1], ['D6', 2], ['B5', 2]],
+    [['C6', 2], ['B5', 1], ['A5', 1], ['G5', 2], ['E5', 2]],
+    [['B5', 1], ['D6', 1], ['r', 1], ['G6', 1], ['F#6', 2], ['D6', 2]],
+    [['A5', 1], ['D6', 1], ['r', 1], ['F#6', 1], ['E6', 2], ['D6', 2]],
+    [['E6', 2], ['C6', 2], ['D6', 1], ['C6', 1], ['B5', 2]],
+    [['G5', 6], ['r', 2]],
+    [['E6', 1], ['E6', 1], ['r', 1], ['D6', 1], ['B5', 2], ['G5', 2]],
+    [['C6', 1], ['C6', 1], ['r', 1], ['B5', 1], ['A5', 2], ['E5', 2]],
+    [['D6', 1], ['D6', 1], ['r', 1], ['B5', 1], ['G5', 2], ['B5', 2]],
+    [['A5', 4], ['r', 2], ['D5', 2]],
+    [['G5', 1], ['B5', 1], ['E6', 2], ['D6', 1], ['B5', 1], ['G5', 2]],
+    [['A5', 1], ['C6', 1], ['E6', 2], ['D6', 1], ['C6', 1], ['A5', 2]],
+    [['F#5', 1], ['A5', 1], ['D6', 2], ['E6', 1], ['F#6', 1], ['A6', 2]],
+    [['F#6', 4], ['r', 4]],
+  ],
+  lead: 'square',
+  leadVol: 0.15,
+  arp: 'pulse25',
+  arpVol: 0.05,
+  arpOctave: 5,
+  drums: ['k..hs.h.k.k.s.h.', 'k..hs.h.k.k.s.hs'],
+});
+
+export const TITLE_THEMES = [DRAFT_1, DRAFT_2, DRAFT_3];
+export const TITLE_THEME = DRAFT_1;
