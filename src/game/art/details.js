@@ -66,7 +66,7 @@ export const DETAILS = {
 };
 
 // Cars: fixed set, deterministic, spread over the level.
-function makeCars(levelWidth) {
+export function makeCars(levelWidth) {
   const rnd = seeded(42);
   const cars = [];
   for (let i = 0; i < Math.ceil(levelWidth / 90); i++) {
@@ -84,6 +84,27 @@ function makeCars(levelWidth) {
 // Draw all enabled details for this frame onto a 2D canvas.
 //   on: { birds: true, ... }   cam: camera x   t: time in seconds
 //   level: { width, windows, lights } (from levelCanvas info)
+// ---- shared movement (used by the picks page and the game) ----
+const acrossSky = (t, cam, speed, parallax, span, offset) =>
+  GAME_W + 20 - ((((t * speed + cam * parallax + offset) % span) + span) % span);
+const FLOCK = [[0, 0], [7, -4], [13, 2], [19, -2], [8, 6]];
+
+// Bird positions on screen: [{ x, y, frame }]
+export function birdFlock(cam, t) {
+  const baseX = Math.round(acrossSky(t, cam, 16, 0.2, GAME_W + 160, 60));
+  const baseY = HUD_H + 56 + Math.round(Math.sin(t * 0.6) * 6);
+  return FLOCK.map(([dx, dy], i) => ({ x: baseX + dx, y: baseY + dy, frame: Math.floor(t * 4 + i) % 2 }));
+}
+// The two bird frames as pixel rows, facing left (they fly right-to-left).
+export function birdFrames(style = 'blue') {
+  return BIRD.map((f) => silhouette(f, style === 'color' ? 'blue' : style).map((r) => [...r].reverse().join('')));
+}
+// A car's x in the world at time t.
+export function carX(c, t, width) {
+  return (((c.x + c.speed * t) % width) + width) % width;
+}
+export const antennaLightOn = (t) => Math.floor(t * 1.5) % 2 === 0;
+
 export function createDetails(level) {
   const cars = makeCars(level.width);
   const winRnd = seeded(7);
@@ -104,14 +125,8 @@ export function createDetails(level) {
         drawSprite(g, look('balloon', BALLOON, style), x, Math.round(HUD_H + 40 + Math.sin(t * 0.25) * 10));
       }
       if (on.birds) {
-        const baseX = Math.round(across(16, 0.2, GAME_W + 160, 60));
-        const baseY = HUD_H + 56 + Math.round(Math.sin(t * 0.6) * 6);
-        const flock = [[0, 0], [7, -4], [13, 2], [19, -2], [8, 6]];
-        flock.forEach(([dx, dy], i) => {
-          const f = Math.floor(t * 4 + i) % 2;
-          const frame = look('bird' + f, BIRD[f], style === 'color' ? 'blue' : style);
-          drawSprite(g, frame, baseX + dx, baseY + dy, 1, true);
-        });
+        const frames = birdFrames(style);
+        for (const b of birdFlock(cam, t)) drawSprite(g, frames[b.frame], b.x, b.y);
       }
     },
     // Things on the buildings and road (drawn on top of the level picture).
@@ -133,13 +148,13 @@ export function createDetails(level) {
           }
         }
       }
-      if (on.antennaLights && Math.floor(t * 1.5) % 2 === 0) {
+      if (on.antennaLights && antennaLightOn(t)) {
         g.fillStyle = HEX.white;
         for (const [lx, ly] of level.lights) if (lx - cam > -2 && lx - cam < GAME_W + 2) g.fillRect(lx - cam, ly, 1, 1);
       }
       if (on.cars) {
         for (const c of cars) {
-          const x = ((((c.x + c.speed * t) % level.width) + level.width) % level.width) - cam;
+          const x = carX(c, t, level.width) - cam;
           if (x > -8 && x < GAME_W + 8) drawSprite(g, c.sprite, Math.round(x), c.y);
         }
       }

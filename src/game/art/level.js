@@ -33,6 +33,17 @@ export function levelCanvas(world, info = null) {
   return c;
 }
 
+// Level picture + positions of windows and antenna lights, made once per level.
+const artCache = new Map();
+export function levelArt(world) {
+  if (!artCache.has(world.id)) {
+    const info = {};
+    const canvas = levelCanvas(world, info);
+    artCache.set(world.id, { canvas, info });
+  }
+  return artCache.get(world.id);
+}
+
 // Background layers (all repeat every 720 px horizontally).
 export const BG_REPEAT = 720;
 

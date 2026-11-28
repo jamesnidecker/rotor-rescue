@@ -4,6 +4,7 @@ import { sheetCanvas, spriteSize } from '../../kit/pixels.js';
 import { HELICOPTERS } from '../art/helicopters.js';
 import { PERSON_FRAMES } from '../art/people.js';
 import { CHOICES } from '../choices.js';
+import { birdFrames } from '../art/details.js';
 
 // Turns the pixel art (drawn in code) into Phaser textures once at startup.
 function addSheet(scene, key, frames) {
@@ -21,6 +22,7 @@ export default class BootScene extends Phaser.Scene {
     buildArcadeFont(this);
     addSheet(this, 'heli', HELICOPTERS[CHOICES.heli].frames);
     addSheet(this, 'person', PERSON_FRAMES);
+    addSheet(this, 'bird', birdFrames(CHOICES.silhouettes));
     this.scene.start('title');
   }
 }

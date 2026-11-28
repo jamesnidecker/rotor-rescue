@@ -23,7 +23,9 @@ import { createHeli, press, release, stepHeli } from '../physics.js';
 import { lifeIcon, personIcon } from '../icons.js';
 import { sound } from '../sound.js';
 import { CHOICES } from '../choices.js';
-import { levelCanvas, skyCanvas, skylineCanvas, cloudsCanvas, BG_REPEAT } from '../art/level.js';
+import { levelArt, skyCanvas, skylineCanvas, cloudsCanvas, BG_REPEAT } from '../art/level.js';
+import { birdFlock, makeCars, carX, antennaLightOn } from '../art/details.js';
+import { spriteCanvas } from '../../kit/pixels.js';
 
 const DT = 1 / 120; // fixed physics step: same feel at 60 Hz and 120 Hz
 const UI_DEPTH = 100;
@@ -91,7 +93,23 @@ export default class GameScene extends Phaser.Scene {
     this.cloudsImg = bg(tex(`clouds-${CHOICES.clouds}`, () => cloudsCanvas(CHOICES.clouds))).setDepth(-10).setY(HUD_H);
 
     // The level itself (buildings, helipad, ground) as one picture.
-    this.add.image(0, 0, tex(`level-${this.world.id}`, () => levelCanvas(this.world))).setOrigin(0);
+    const art = levelArt(this.world);
+    this.add.image(0, 0, tex(`level-${this.world.id}`, () => art.canvas)).setOrigin(0);
+
+    // Living-city details picked on the picks page (CHOICES.details).
+    const on = CHOICES.details;
+    this.birds = on.birds ? [0, 1, 2, 3, 4].map(() => this.add.sprite(0, 0, 'bird', 0).setOrigin(0).setScrollFactor(0).setDepth(-15)) : [];
+    this.levelWidth = this.world.length + GAME_W;
+    this.cars = on.cars
+      ? makeCars(this.levelWidth).map((c) => {
+          const key = `car-${c.sprite.join('')}`;
+          if (!this.textures.exists(key)) this.textures.addCanvas(key, spriteCanvas(c.sprite));
+          return { c, img: this.add.image(0, 0, key).setOrigin(0).setDepth(1) };
+        })
+      : [];
+    this.antennaLights = on.antennaLights
+      ? art.info.lights.map(([lx, ly]) => this.add.rectangle(lx, ly, 1, 1, PAL.white).setOrigin(0).setDepth(1))
+      : [];
 
     // Blinking helipad lights.
     const pad = this.world.pad;
@@ -558,6 +576,9 @@ export default class GameScene extends Phaser.Scene {
     this.personRects.forEach((spr, id) => spr.setFrame((wave + id) % 2));
     const lightsOn = Math.floor(now / 500) % 2 === 0;
     this.padLights.forEach((l) => l.setVisible(lightsOn));
+    const t = now / 1000;
+    const blink = antennaLightOn(t);
+    this.antennaLights.forEach((l) => l.setVisible(blink));
 
     // Hover gauge display (hover-limit mode 2), see tuning 'gaugeDisplay':
     //   0 = small meter in the HUD + helicopter flashes when almost empty
@@ -585,5 +606,16 @@ export default class GameScene extends Phaser.Scene {
     // Parallax background (whole pixels only).
     this.skylineImg.setX(-(Math.round(sx * 0.3) % BG_REPEAT));
     this.cloudsImg.setX(-(Math.round(sx * 0.1 + now * 0.004) % BG_REPEAT));
+
+    // Far-away birds (screen positions) and cars on the road (world positions).
+    if (this.birds.length) {
+      birdFlock(sx, t).forEach((b, i) => this.birds[i].setPosition(b.x, b.y).setFrame(b.frame));
+    }
+    for (const { c, img } of this.cars) {
+      const x = carX(c, t, this.levelWidth);
+      const visible = x > sx - 10 && x < sx + GAME_W + 10;
+      img.setVisible(visible);
+      if (visible) img.setPosition(Math.round(x), c.y);
+    }
   }
 }

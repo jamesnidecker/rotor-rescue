@@ -8,6 +8,9 @@ export const CHOICES = {
   sky: 'C', // Plain
   clouds: 'A', // Puffy
   theme: 3, // Draft 3 — Sunny
+  // Living-city details (picks page 2026-11-28)
+  details: { birds: true, cars: true, antennaLights: true, balloon: false, blimp: false, windows: false },
+  silhouettes: 'blue', // far-away things as soft blue silhouettes
   // Music while flying is set per level, in each level file (level.music).
   sfx: {
     tap: 'A', // Blip
@@ -17,8 +20,8 @@ export const CHOICES = {
     landing: 'B', // Touchdown
     levelClear: 'B', // Bouncy
     click: 'B', // Blip
-    bump: 'A', // Bonk — Claude's pick until the kids choose
-    victory: 'A', // Victory fanfare — Claude's pick until the kids choose
+    bump: 'B', // Soft thud
+    victory: 'C', // Happy landing
   },
 };
 
