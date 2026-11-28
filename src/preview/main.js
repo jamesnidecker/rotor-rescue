@@ -16,10 +16,12 @@ import { LEVEL_THEMES } from '../game/audio/levelMusic.js';
 import { buildWorld } from '../game/world.js';
 import { getLevel } from '../game/levels/index.js';
 import { levelCanvas } from '../game/art/level.js';
+import { createDetails, DETAILS } from '../game/art/details.js';
 import { GAME_W, GAME_H, GROUND_Y, HUD_H } from '../game/config.js';
 
 const store = createStore('rotor-rescue.');
-const picks = { heli: 'A', sky: 'A', clouds: 'A', ...store.load('picks.v1', {}) };
+const picks = { heli: 'A', sky: 'A', clouds: 'A', details: {}, ...store.load('picks.v1', {}) };
+picks.details = picks.details || {};
 const savePicks = () => store.save('picks.v1', picks);
 const synth = createSynth({ volume: 0.35 });
 const music = createMusicPlayer(synth);
@@ -44,7 +46,9 @@ const scene = el('canvas', { className: 'scene', width: GAME_W, height: GAME_H }
 app.append(scene);
 
 const world = buildWorld(getLevel(1));
-const strip = levelCanvas(world);
+const levelInfo = {};
+const strip = levelCanvas(world, levelInfo);
+const details = createDetails({ width: world.length + GAME_W, ...levelInfo });
 // Background layers: sky (fixed), far skyline (slow), clouds (slower still).
 const sky = el('canvas', { width: GAME_W, height: GAME_H });
 const skyline = el('canvas', { width: 900, height: GAME_H });
@@ -84,7 +88,9 @@ function frame(now) {
   const sx = Math.round(cam * 0.3) % 720;
   g.drawImage(skyline, -sx, 0);
   g.drawImage(skyline, 720 - sx, 0);
+  details.drawFar(g, picks.details, cam, now / 1000);
   g.drawImage(strip, -cam, 0);
+  details.drawNear(g, picks.details, cam, now / 1000);
   const wave = Math.floor(now / 350) % 2;
   for (const p of world.people) {
     drawSprite(g, PERSON_FRAMES[(wave + p.id) % 2], Math.round(p.x - cam - 0.5), p.roofY - 7);
@@ -158,6 +164,22 @@ function pickRow(title, note, options, key) {
 }
 pickRow('3. Sky', 'Tap one: the live scene at the top changes to show it.', SKIES, 'sky');
 pickRow('4. Clouds', 'Tap one: the live scene at the top changes to show it.', CLOUDS, 'clouds');
+
+app.append(el('h2', {}, '4b. Extra details'), el('p', { className: 'note' }, 'Switch details on and off and watch the live scene at the top. None of them can be crashed into. Keep the ones that make it nicer; switch off what makes it too busy.'));
+const detailBtns = [];
+const detailRow = el('div', {});
+for (const [k, d] of Object.entries(DETAILS)) {
+  const b = el('button', {}, '');
+  b.dataset.detail = k;
+  b.addEventListener('click', () => {
+    picks.details[k] = !picks.details[k];
+    savePicks();
+    refresh();
+  });
+  detailBtns.push([b, d]);
+  detailRow.append(b);
+}
+app.append(detailRow);
 
 // ---------------------------------------------------------------- people & city
 app.append(el('h2', {}, '5. People and buildings'));
@@ -257,6 +279,7 @@ copyBtn.addEventListener('click', async () => {
     `helicopter: ${picks.heli} (${HELICOPTERS[picks.heli].name})`,
     ...Object.entries(SFX).map(([k, s]) => `${k}: ${picks[k] ? `${picks[k]} (${s[picks[k]].name})` : '-'}`),
     `sky: ${picks.sky} (${SKIES[picks.sky].name})`,
+    `details on: ${Object.entries(DETAILS).filter(([k]) => picks.details[k]).map(([, d]) => d.name).join(', ') || 'none'}`,
     `clouds: ${picks.clouds} (${CLOUDS[picks.clouds].name})`,
     `title theme: ${picks.theme ? TITLE_THEMES[Number(picks.theme) - 1]?.name ?? picks.theme : '-'}`,
     `music while flying: ${picks.levelMusic ? LEVEL_THEMES[Number(picks.levelMusic) - 1]?.name : '-'}`,
@@ -270,6 +293,11 @@ function refresh() {
   document.querySelectorAll('.card').forEach((c) => c.classList.toggle('picked', picks[c.dataset.group] === c.dataset.key));
   soundButtons.forEach((b) => b.classList.toggle('picked', picks[b.dataset.sound] === b.dataset.key));
   themeBtns.forEach((b) => b.classList.toggle('picked', picks.theme === b.dataset.theme));
+  for (const [b, d] of detailBtns) {
+    const on = !!picks.details[b.dataset.detail];
+    b.classList.toggle('picked', on);
+    b.textContent = `${on ? 'ON' : 'OFF'}: ${d.name}`;
+  }
   levelBtns.forEach((b) => b.classList.toggle('picked', picks.levelMusic === b.dataset.level));
 }
 refresh();

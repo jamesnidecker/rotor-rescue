@@ -4,7 +4,9 @@ import { drawBuilding, drawSky, drawClouds, drawSkyline } from './city.js';
 
 // Draws a whole level (buildings, helipad, ground) into one canvas.
 // Roofs with people get no rooftop details, so nothing hides a person.
-export function levelCanvas(world) {
+// `info` (optional) receives { windows, lights } positions for animated details.
+export function levelCanvas(world, info = null) {
+  if (info) Object.assign(info, { windows: info.windows || [], lights: info.lights || [] });
   const c = document.createElement('canvas');
   c.width = world.length + GAME_W;
   c.height = GAME_H;
@@ -12,7 +14,7 @@ export function levelCanvas(world) {
   world.solids.forEach((s, i) => {
     if (s.kind === 'building') {
       const hasPerson = world.people.some((p) => p.x >= s.x && p.x <= s.x + s.w);
-      drawBuilding(g, s.x, s.y, s.w, s.h, s.shade, hasPerson ? 0 : i + 1);
+      drawBuilding(g, s.x, s.y, s.w, s.h, s.shade, hasPerson ? 0 : i + 1, info);
     } else {
       g.fillStyle = HEX.darkGrey;
       g.fillRect(s.x, s.y, s.w, s.h);

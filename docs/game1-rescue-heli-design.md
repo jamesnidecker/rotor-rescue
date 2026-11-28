@@ -1,6 +1,6 @@
 # Rotor Rescue — Game Design
 
-**Version:** 0.13 · 2026-11-26
+**Version:** 0.14 · 2026-11-28
 **Studio:** 8Blip Arcade
 **App Store title:** Rotor Rescue · **Subtitle (proposal):** 8-bit Heli Rescue Arcade
 **Replaces:** the dodge game as game #1 (the dodge game moves to "later")
@@ -213,6 +213,7 @@ Each update: new location(s), one new obstacle type, one new music track, new se
 | 0.7 | 2026-11-23 | Locked: 10 levels per update, cap 42. Level 12 is a neon futuristic city finale. |
 | 0.8 | 2026-11-23 | Name locked: Rotor Rescue. Build brief for milestone 1 written. |
 | 0.9 | 2026-11-23 | Locked: portrait, iPad arcade cabinet frame. Added difficulty target with measurable playtest targets, sawtooth curve and a local-only playtest stats screen. Copied into the repo's `docs/` folder on 2026-11-24; build order now lives in the playbook. |
+| 0.14 | 2026-11-28 | Living-city details to pick on the picks page (each on/off): far-away birds, hot-air balloon, blimp, cars on the road, blinking antenna lights, windows switching on. Rule: background details are small, soft and far away and can never be crashed into, so they never look like obstacles; real birds to dodge (level 7+) must look clearly different (bigger, darker, in front). |
 | 0.13 | 2026-11-26 | Changed (Jozo, after his kid flew into the top): the top of the screen no longer crashes; the helicopter bumps against it (soft ceiling). Added a reward tune that plays when the helicopter reaches the helipad and lands (3 versions on the picks page). |
 | 0.12 | 2026-11-26 | Music while flying: each level gets its own track (set in the level file). Level 1 = "Sky Patrol", level 2 = "Happy Heli" (Jozo couldn't choose between them, so both are used). "Rooftop Run" kept in reserve. |
 | 0.11 | 2026-11-26 | Milestone 2 picks by Jozo's kids (picks page `preview.html`): helicopter B "Bubble", plain sky, puffy clouds, title theme Draft 3 "Sunny"; sounds: tap Blip, rescue Happy arpeggio, countdown Classic beeps, landing Touchdown, level complete Bouncy, menu Blip. Crash: none of round 1 — "more of an exploding sound, bigger impact" → round 2 (D/E/F) → "a bit too short" → round 3: **G "Mega explosion"** picked. |

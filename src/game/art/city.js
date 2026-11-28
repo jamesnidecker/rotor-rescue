@@ -13,7 +13,8 @@ const SHADES = [
 
 // One building (x, y = top-left on the canvas, w x h). Windows, edges and a
 // few rooftop details, all from the palette. `seed` keeps it the same each time.
-export function drawBuilding(ctx, x, y, w, h, shadeIndex = 0, seed = 1) {
+// `info` (optional) collects window and antenna-light positions, for animation.
+export function drawBuilding(ctx, x, y, w, h, shadeIndex = 0, seed = 1, info = null) {
   const s = SHADES[shadeIndex % SHADES.length];
   const rnd = seeded(seed * 7919 + w * 31 + h);
   ctx.fillStyle = s.body;
@@ -31,6 +32,7 @@ export function drawBuilding(ctx, x, y, w, h, shadeIndex = 0, seed = 1) {
       const r = rnd();
       ctx.fillStyle = r < 0.12 ? HEX.white : r < 0.55 ? HEX.skyBlue : HEX.royalBlue;
       ctx.fillRect(wx, wy, 2, 3);
+      if (info) info.windows.push([wx, wy, ctx.fillStyle]);
     }
   }
 
@@ -53,6 +55,7 @@ export function drawBuilding(ctx, x, y, w, h, shadeIndex = 0, seed = 1) {
       ctx.fillRect(ax, y - 9, 1, 9);
       ctx.fillStyle = HEX.red;
       ctx.fillRect(ax, y - 10, 1, 1);
+      if (info) info.lights.push([ax, y - 10]);
     } else {
       // air conditioning box
       const bx = x + 4 + Math.floor(rnd() * (w - 16));
