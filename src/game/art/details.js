@@ -38,6 +38,24 @@ const carSprite = (c, flip) => CAR.map((r) => {
   return flip ? [...row].reverse().join('') : row;
 });
 
+// How far-away things are drawn (picked on the picks page):
+//   blue  = soft blue silhouettes, the same colour as the far skyline
+//   grey  = light grey silhouettes
+//   color = in full colour
+export const SILHOUETTES = {
+  blue: { name: 'Soft blue silhouettes', note: 'Same colour as the far skyline: reads as "far away"' },
+  grey: { name: 'Light grey silhouettes', note: 'Grey shapes, no colour' },
+  color: { name: 'In colour', note: 'Full colour (most eye-catching)' },
+};
+const silhouette = (rows, style) =>
+  style === 'color' ? rows : rows.map((r) => r.replace(/[^.]/g, style === 'grey' ? 'L' : 'B'));
+const cache = new Map();
+const look = (name, rows, style) => {
+  const key = name + style;
+  if (!cache.has(key)) cache.set(key, silhouette(rows, style));
+  return cache.get(key);
+};
+
 export const DETAILS = {
   birds: { name: 'Birds in the distance', note: 'A small flock, soft blue, far away' },
   balloon: { name: 'Hot-air balloon', note: 'Far away, slowly drifting up and down' },
@@ -72,25 +90,26 @@ export function createDetails(level) {
   const winOn = new Map(); // window index -> until time
   return {
     // Things far away (drawn behind the buildings).
-    drawFar(g, on, cam, t) {
+    drawFar(g, on, cam, t, style = 'blue') {
       // Everything far away moves right-to-left across the sky: its own slow
       // speed plus a little parallax from the camera.
       const across = (speed, parallax, span, offset) =>
         GAME_W + 20 - ((((t * speed + cam * parallax + offset) % span) + span) % span);
       if (on.blimp) {
         const x = Math.round(across(6, 0.05, GAME_W + 60, 0));
-        drawSprite(g, BLIMP, x, HUD_H + 10 + Math.round(Math.sin(t * 0.4) * 2));
+        drawSprite(g, look('blimp', BLIMP, style), x, HUD_H + 10 + Math.round(Math.sin(t * 0.4) * 2));
       }
       if (on.balloon) {
         const x = Math.round(across(2, 0.1, GAME_W + 220, 120));
-        drawSprite(g, BALLOON, x, Math.round(HUD_H + 40 + Math.sin(t * 0.25) * 10));
+        drawSprite(g, look('balloon', BALLOON, style), x, Math.round(HUD_H + 40 + Math.sin(t * 0.25) * 10));
       }
       if (on.birds) {
         const baseX = Math.round(across(16, 0.2, GAME_W + 160, 60));
         const baseY = HUD_H + 56 + Math.round(Math.sin(t * 0.6) * 6);
         const flock = [[0, 0], [7, -4], [13, 2], [19, -2], [8, 6]];
         flock.forEach(([dx, dy], i) => {
-          const frame = BIRD[Math.floor(t * 4 + i) % 2];
+          const f = Math.floor(t * 4 + i) % 2;
+          const frame = look('bird' + f, BIRD[f], style === 'color' ? 'blue' : style);
           drawSprite(g, frame, baseX + dx, baseY + dy, 1, true);
         });
       }

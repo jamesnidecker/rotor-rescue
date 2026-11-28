@@ -16,11 +16,11 @@ import { LEVEL_THEMES } from '../game/audio/levelMusic.js';
 import { buildWorld } from '../game/world.js';
 import { getLevel } from '../game/levels/index.js';
 import { levelCanvas } from '../game/art/level.js';
-import { createDetails, DETAILS } from '../game/art/details.js';
+import { createDetails, DETAILS, SILHOUETTES } from '../game/art/details.js';
 import { GAME_W, GAME_H, GROUND_Y, HUD_H } from '../game/config.js';
 
 const store = createStore('rotor-rescue.');
-const picks = { heli: 'A', sky: 'A', clouds: 'A', details: {}, ...store.load('picks.v1', {}) };
+const picks = { heli: 'A', sky: 'A', clouds: 'A', details: {}, silhouettes: 'blue', ...store.load('picks.v1', {}) };
 picks.details = picks.details || {};
 const savePicks = () => store.save('picks.v1', picks);
 const synth = createSynth({ volume: 0.35 });
@@ -88,7 +88,7 @@ function frame(now) {
   const sx = Math.round(cam * 0.3) % 720;
   g.drawImage(skyline, -sx, 0);
   g.drawImage(skyline, 720 - sx, 0);
-  details.drawFar(g, picks.details, cam, now / 1000);
+  details.drawFar(g, picks.details, cam, now / 1000, picks.silhouettes);
   g.drawImage(strip, -cam, 0);
   details.drawNear(g, picks.details, cam, now / 1000);
   const wave = Math.floor(now / 350) % 2;
@@ -180,6 +180,7 @@ for (const [k, d] of Object.entries(DETAILS)) {
   detailRow.append(b);
 }
 app.append(detailRow);
+pickRow('4c. How far-away things look', 'For the birds, balloon and blimp. Switch them on above, then tap a style: the live scene changes.', SILHOUETTES, 'silhouettes');
 
 // ---------------------------------------------------------------- people & city
 app.append(el('h2', {}, '5. People and buildings'));
@@ -279,6 +280,7 @@ copyBtn.addEventListener('click', async () => {
     `helicopter: ${picks.heli} (${HELICOPTERS[picks.heli].name})`,
     ...Object.entries(SFX).map(([k, s]) => `${k}: ${picks[k] ? `${picks[k]} (${s[picks[k]].name})` : '-'}`),
     `sky: ${picks.sky} (${SKIES[picks.sky].name})`,
+    `far-away style: ${SILHOUETTES[picks.silhouettes]?.name}`,
     `details on: ${Object.entries(DETAILS).filter(([k]) => picks.details[k]).map(([, d]) => d.name).join(', ') || 'none'}`,
     `clouds: ${picks.clouds} (${CLOUDS[picks.clouds].name})`,
     `title theme: ${picks.theme ? TITLE_THEMES[Number(picks.theme) - 1]?.name ?? picks.theme : '-'}`,
